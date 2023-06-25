@@ -1,5 +1,7 @@
 package structs
 
-type EntityName struct {
-	Entities map[string]interface{} `yaml:",inline"`
+type Fixture struct {
+	Entities map[string]Entity `yaml:",inline"`
 }
+
+type Entity map[string]interface{}

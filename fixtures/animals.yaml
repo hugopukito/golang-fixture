@@ -10,3 +10,11 @@ Dog:
   thirdDog:
     name: "chien3"
     breed: "akita"
+
+Cat:
+  firstCat:
+    name: "chat1"
+    color: "orange"
+  secondCat:
+    name: "chat2"
+    color: "grey"

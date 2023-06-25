@@ -1,0 +1,12 @@
+Dog:
+  firstDog:
+    name: "chien1"
+    breed: "bulldog"
+
+  secondDog:
+    name: "chien2"
+    breed: "beagle"
+
+  thirdDog:
+    name: "chien3"
+    breed: "akita"

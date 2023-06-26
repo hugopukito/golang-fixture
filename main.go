@@ -10,6 +10,9 @@ import (
 )
 
 func main() {
+
+	funcs.InitLocalStructs("structs")
+
 	yamlFile, err := os.ReadFile("fixtures/animals.yaml")
 	if err != nil {
 		fmt.Println("Error reading YAML file:", err)

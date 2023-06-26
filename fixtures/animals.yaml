@@ -19,7 +19,7 @@ Cat:
     name: "chat2"
     color: "grey"
 
-Turtle:
-  firstTurtle:
-    name: "turtle1"
-    size: "big"
+# Turtle:
+#   firstTurtle:
+#     name: "turtle1"
+#     size: "big"

@@ -2,12 +2,17 @@ package main
 
 import (
 	"fixture/funcs"
-	"fixture/structs"
 	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v3"
 )
+
+type Fixture struct {
+	Entities map[string]Entity `yaml:",inline"`
+}
+
+type Entity map[string]interface{}
 
 func main() {
 
@@ -19,7 +24,7 @@ func main() {
 		return
 	}
 
-	var yamlFixture structs.Fixture
+	var yamlFixture Fixture
 
 	err = yaml.Unmarshal(yamlFile, &yamlFixture)
 	if err != nil {
@@ -27,16 +32,16 @@ func main() {
 		return
 	}
 
-	// structuredFixture := structs.Fixture{
-	// 	Entities: make(map[string]structs.Entity),
-	// }
-
-	for k := range yamlFixture.Entities {
-		// fmt.Println("entity struct name: ", k)
-		// for k, v := range v {
-		// 	fmt.Println("entity name: ", k)
-		// 	fmt.Println("entity fields and values", v)
-		// }
-		funcs.StructAssign(k)
+	for structName, entityMap := range yamlFixture.Entities {
+		structFields, exist := funcs.GetFieldsFromStructName(structName)
+		if exist {
+			fmt.Println(structName, structFields)
+			fmt.Println()
+		}
+		for entityName, fieldsAndValues := range entityMap {
+			fmt.Print(entityName + " ")
+			fmt.Println(fieldsAndValues)
+		}
+		fmt.Println()
 	}
 }

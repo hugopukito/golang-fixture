@@ -1,47 +1,28 @@
 package main
 
 import (
+	"fixture/color"
+	"fixture/database"
 	"fixture/funcs"
 	"fmt"
-	"os"
-
-	"gopkg.in/yaml.v3"
+	"log"
 )
-
-type Fixture struct {
-	Entities map[string]Entity `yaml:",inline"`
-}
-
-type Entity map[string]interface{}
 
 func main() {
 
+	fmt.Println(color.Pink + "Testing connection to your sql..." + color.Reset)
+	database.InitDB("fixture")
+
+	fmt.Println(color.Purple + "Parsing your local strucs..." + color.Reset)
 	funcs.InitLocalStructs("structs")
 
-	yamlFile, err := os.ReadFile("fixtures/animals.yaml")
+	yamlFixtures, err := funcs.GetYamlStructs("fixtures")
 	if err != nil {
-		fmt.Println("Error reading YAML file:", err)
-		return
+		log.Panicln(color.Red + "GetYamlStructs err: " + err.Error() + color.Reset)
 	}
 
-	var yamlFixture Fixture
-
-	err = yaml.Unmarshal(yamlFile, &yamlFixture)
-	if err != nil {
-		fmt.Println("Error unmarshaling YAML:", err)
-		return
-	}
-
-	for structName, entityMap := range yamlFixture.Entities {
-		structFields, exist := funcs.GetFieldsFromStructName(structName)
-		if exist {
-			fmt.Println(structName, structFields)
-			fmt.Println()
-		}
-		for entityName, fieldsAndValues := range entityMap {
-			fmt.Print(entityName + " ")
-			fmt.Println(fieldsAndValues)
-		}
-		fmt.Println()
+	fmt.Println(color.Blue + "Parsing your fixtures... \n" + color.Reset)
+	for _, yamlFixture := range yamlFixtures {
+		funcs.ParseFixture(yamlFixture)
 	}
 }

@@ -2,6 +2,7 @@ Dog:
   firstDog:
     name: "chien1"
     breed: "bulldog"
+    size: 3
 
   secondDog:
     name: "chien2"
@@ -10,7 +11,6 @@ Dog:
   thirdDog:
     name: "chien3"
     breed: "akita"
-    bug: "bug"
 
 Cat:
   firstCat:

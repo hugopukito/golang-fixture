@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -42,6 +43,14 @@ func GetYamlStructs(pkgName string) ([]Fixture, error) {
 		if err != nil {
 			fmt.Println("Error unmarshaling YAML:", err)
 		}
+
+		newMap := make(map[string]Entity, len(yamlFixture.Entities))
+
+		for k, v := range yamlFixture.Entities {
+			lowercaseKey := strings.ToLower(k)
+			newMap[lowercaseKey] = v
+		}
+		yamlFixture.Entities = newMap
 
 		yamlFixtures = append(yamlFixtures, yamlFixture)
 	}

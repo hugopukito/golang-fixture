@@ -84,7 +84,7 @@ func getAllStructsInPackage(pkgName string) error {
 						continue
 					}
 
-					structName := typeSpec.Name.Name
+					structName := strings.ToLower(typeSpec.Name.Name)
 					fieldMap := make(map[string]string)
 
 					structType, ok := typeSpec.Type.(*ast.StructType)

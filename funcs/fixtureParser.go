@@ -13,10 +13,14 @@ func ParseFixture(yamlFixture Fixture) {
 		if exist {
 			fmt.Println(color.Green+"Processing struct ->", color.Yellow, structName+"..."+color.Reset)
 			for entityName, fieldsAndValues := range entityMap {
-				fmt.Println(color.Cyan+"Adding entity ->", color.Yellow, entityName+"..."+color.Reset)
 				if CheckEntityOfStructIsValid(structName, fieldsAndValues, entityName) {
 					ensureTableIsCreated(structName, localStruct)
-					database.InsertEntity(structName, fieldsAndValues)
+					keysWithTypeUUID := retrieveKeysWithTypeUUID(localStruct)
+					err := database.InsertEntity(structName, fieldsAndValues, keysWithTypeUUID)
+					fmt.Println(color.Cyan+"Adding entity ->", color.Yellow, entityName+"..."+color.Reset)
+					if err != nil {
+						fmt.Println(color.Red+"failed creating entity: "+color.Orange+entityName, color.Red+err.Error()+color.Reset)
+					}
 				}
 			}
 		} else {
@@ -37,4 +41,14 @@ func ensureTableIsCreated(structName string, localStruct map[string]string) {
 			log.Panicln(color.Red+"failed creating table for structName: "+color.Orange+structName, color.Red+err.Error()+color.Reset)
 		}
 	}
+}
+
+func retrieveKeysWithTypeUUID(localStruct map[string]string) []string {
+	var keys []string
+	for k, v := range localStruct {
+		if v == "UUID" || v == "uuid.UUID" {
+			keys = append(keys, k)
+		}
+	}
+	return keys
 }

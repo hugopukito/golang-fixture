@@ -104,7 +104,7 @@ func getAllStructsInPackage(pkgName string) error {
 						case *ast.Ident:
 							fieldType = fieldTypeExpr.Name
 						case *ast.SelectorExpr:
-							fieldType = fieldTypeExpr.Sel.Name
+							fieldType = getFullSelectorExpr(fieldTypeExpr)
 						}
 
 						fieldMap[fieldName] = fieldType
@@ -116,4 +116,20 @@ func getAllStructsInPackage(pkgName string) error {
 		}
 	}
 	return nil
+}
+
+func getFullSelectorExpr(expr *ast.SelectorExpr) string {
+	var pkgName string
+	var identName string
+
+	switch pkg := expr.X.(type) {
+	case *ast.Ident:
+		pkgName = pkg.Name
+	case *ast.SelectorExpr:
+		pkgName = getFullSelectorExpr(pkg)
+	}
+
+	identName = expr.Sel.Name
+
+	return pkgName + "." + identName
 }

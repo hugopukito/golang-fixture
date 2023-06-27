@@ -1,10 +1,14 @@
 package database
 
 import (
+	"errors"
+	"fixture/color"
 	"fmt"
+	"strings"
 )
 
 func InsertEntity(structName string, entity map[string]interface{}) {
+	// TODO insert
 }
 
 func CheckTableExist(tableName string) (bool, error) {
@@ -20,14 +24,22 @@ func CheckTableExist(tableName string) (bool, error) {
 }
 
 func CreateTable(tableName string, localStruct map[string]string) error {
-	// query := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (id INT PRIMARY KEY, name VARCHAR(255))", tableName)
+	columns := make([]string, 0, len(localStruct))
 
-	// _, err := sqlConn.Exec(query)
-	// if err != nil {
-	// 	return fmt.Errorf("failed to create table: %w", err)
-	// }
+	for column, columnType := range localStruct {
+		sqlType, exist := goSQLTypeMap[columnType]
+		if !exist {
+			return errors.New(color.Red + "sql type for type: " + color.Orange + columnType + color.Red + " doesn't exist")
+		}
+		columns = append(columns, fmt.Sprintf("%s %s", column, sqlType))
+	}
 
-	fmt.Println(localStruct)
+	query := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (%s)", tableName, strings.Join(columns, ", "))
+
+	_, err := sqlConn.Exec(query)
+	if err != nil {
+		return fmt.Errorf("failed to create table: %w", err)
+	}
 
 	return nil
 }

@@ -13,7 +13,7 @@ func main() {
 	fmt.Println(color.Pink + "Testing connection to your sql..." + color.Reset)
 	database.InitDB("fixture")
 
-	fmt.Println(color.Purple + "Parsing your local strucs..." + color.Reset)
+	fmt.Println(color.Blue + "Parsing your local strucs..." + color.Reset)
 	funcs.InitLocalStructs("structs")
 
 	yamlFixtures, err := funcs.GetYamlStructs("fixtures")
@@ -21,7 +21,7 @@ func main() {
 		log.Panicln(color.Red + "GetYamlStructs err: " + err.Error() + color.Reset)
 	}
 
-	fmt.Println(color.Blue + "Parsing your fixtures... \n" + color.Reset)
+	fmt.Println(color.Purple + "Parsing your fixtures... \n" + color.Reset)
 	for _, yamlFixture := range yamlFixtures {
 		funcs.ParseFixture(yamlFixture)
 	}

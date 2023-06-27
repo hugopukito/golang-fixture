@@ -66,13 +66,13 @@ func InitDB(dbName string) {
 		if trimmedStmt != "" {
 			_, err = sqlConn.Exec(trimmedStmt)
 			if err != nil {
-				log.Fatal("Failed to execute SQL statement:", err)
+				log.Panicln(color.Red + "Failed to execute SQL statement: " + err.Error() + color.Reset)
 			}
 		}
 	}
 
-}
-
-func InsertEntity(structName string, entity map[string]interface{}) {
-
+	sqlConn, err = sql.Open("mysql", "root:password@tcp(localhost:3306)/"+dbName)
+	if err != nil {
+		log.Panicln(color.Red + "Failed to connect to sql: " + err.Error() + color.Reset)
+	}
 }

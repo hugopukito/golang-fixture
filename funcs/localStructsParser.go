@@ -23,9 +23,9 @@ func InitLocalStructs(pkgName string) {
 	}
 }
 
-func CheckLocalStructNameExist(structName string) bool {
-	_, ok := structMap[structName]
-	return ok
+func GetLocalStructByName(structName string) (map[string]string, bool) {
+	localStruct, ok := structMap[structName]
+	return localStruct, ok
 }
 
 func CheckEntityOfStructIsValid(structName string, entity map[string]interface{}, entityName string) bool {

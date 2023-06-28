@@ -22,10 +22,12 @@ func InsertEntity(structName string, entity map[string]interface{}, localStruct 
 	placeholders := make([]string, 0)
 
 	for k, v := range localStruct {
-		if value, ok := specialTypes[k+"-"+v]; ok {
-			columns = append(columns, k)
-			values = append(values, value.(func() interface{})())
-			placeholders = append(placeholders, "?")
+		if _, exist := entity[k]; !exist {
+			if value, ok := specialTypes[k+"-"+v]; ok {
+				columns = append(columns, k)
+				values = append(values, value.(func() interface{})())
+				placeholders = append(placeholders, "?")
+			}
 		}
 	}
 
@@ -92,4 +94,6 @@ func addFuncsToSpecialTypes() {
 	}
 	specialTypes["id-uuid"] = generateUUID
 	specialTypes["id-uuid.UUID"] = generateUUID
+
+	// TODO add date
 }

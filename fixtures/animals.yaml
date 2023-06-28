@@ -12,6 +12,10 @@ Dog:
     name: "chien3"
     breed: "akita"
 
+  tina:
+    name: "tina"
+    breed: "grosse chienne"
+
 Cat:
   firstCat:
     name: "chat1"

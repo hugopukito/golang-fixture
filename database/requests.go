@@ -9,15 +9,24 @@ import (
 	"github.com/google/uuid"
 )
 
-func InsertEntity(structName string, entity map[string]interface{}, keysWithTypeUUID []string) error {
+var specialTypes map[string]interface{}
+
+func init() {
+	specialTypes = make(map[string]interface{})
+	addFuncsToSpecialTypes()
+}
+
+func InsertEntity(structName string, entity map[string]interface{}, localStruct map[string]string) error {
 	columns := make([]string, 0)
 	values := make([]interface{}, 0)
 	placeholders := make([]string, 0)
 
-	for _, v := range keysWithTypeUUID {
-		columns = append(columns, v)
-		values = append(values, uuid.New())
-		placeholders = append(placeholders, "?")
+	for k, v := range localStruct {
+		if value, ok := specialTypes[k+"-"+v]; ok {
+			columns = append(columns, k)
+			values = append(values, value.(func() interface{})())
+			placeholders = append(placeholders, "?")
+		}
 	}
 
 	for column, value := range entity {
@@ -26,8 +35,7 @@ func InsertEntity(structName string, entity map[string]interface{}, keysWithType
 		placeholders = append(placeholders, "?")
 	}
 
-	query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)",
-		structName, strings.Join(columns, ", "), strings.Join(placeholders, ", "))
+	query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", structName, strings.Join(columns, ", "), strings.Join(placeholders, ", "))
 
 	_, err := sqlConn.Exec(query, values...)
 	if err != nil {
@@ -41,7 +49,7 @@ func CheckTableExist(tableName string, dbName string) (bool, error) {
 	query := "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?"
 
 	var count int
-	err := sqlConn.QueryRow(query, dbName, "your_table_name").Scan(&count)
+	err := sqlConn.QueryRow(query, dbName, tableName).Scan(&count)
 	if err != nil {
 		return false, err
 	}
@@ -76,4 +84,12 @@ func CreateTable(tableName string, localStruct map[string]string) error {
 	}
 
 	return nil
+}
+
+func addFuncsToSpecialTypes() {
+	generateUUID := func() interface{} {
+		return uuid.New()
+	}
+	specialTypes["id-uuid"] = generateUUID
+	specialTypes["id-uuid.UUID"] = generateUUID
 }

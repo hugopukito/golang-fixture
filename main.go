@@ -39,7 +39,7 @@ func main() {
 
 	fmt.Println(color.Purple + "Parsing your fixtures... \n" + color.Reset)
 	for _, yamlFixture := range yamlFixtures {
-		funcs.ParseFixture(yamlFixture)
+		funcs.ParseFixture(yamlFixture, config.databaseName)
 	}
 }
 

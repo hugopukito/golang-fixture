@@ -7,14 +7,14 @@ import (
 	"log"
 )
 
-func ParseFixture(yamlFixture Fixture) {
+func ParseFixture(yamlFixture Fixture, dbName string) {
 	for structName, entityMap := range yamlFixture.Entities {
 		localStruct, exist := GetLocalStructByName(structName)
 		if exist {
 			fmt.Println(color.Green+"Processing struct ->", color.Yellow, structName+"..."+color.Reset)
 			for entityName, fieldsAndValues := range entityMap {
 				if CheckEntityOfStructIsValid(structName, fieldsAndValues, entityName) {
-					ensureTableIsCreated(structName, localStruct)
+					ensureTableIsCreated(structName, localStruct, dbName)
 					keysWithTypeUUID := retrieveKeysWithTypeUUID(localStruct)
 					err := database.InsertEntity(structName, fieldsAndValues, keysWithTypeUUID)
 					fmt.Println(color.Cyan+"Adding entity ->", color.Yellow, entityName+"..."+color.Reset)
@@ -30,8 +30,8 @@ func ParseFixture(yamlFixture Fixture) {
 	}
 }
 
-func ensureTableIsCreated(structName string, localStruct map[string]string) {
-	exist, err := database.CheckTableExist(structName)
+func ensureTableIsCreated(structName string, localStruct map[string]string, dbName string) {
+	exist, err := database.CheckTableExist(structName, dbName)
 	if err != nil {
 		log.Panicln(color.Red+"failed creating table for structName: "+color.Orange+structName, color.Red+err.Error()+color.Reset)
 	}

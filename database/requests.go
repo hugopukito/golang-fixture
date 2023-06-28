@@ -37,13 +37,13 @@ func InsertEntity(structName string, entity map[string]interface{}, keysWithType
 	return nil
 }
 
-func CheckTableExist(tableName string) (bool, error) {
-	query := "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?"
+func CheckTableExist(tableName string, dbName string) (bool, error) {
+	query := "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?"
 
 	var count int
-	err := sqlConn.QueryRow(query, tableName).Scan(&count)
+	err := sqlConn.QueryRow(query, dbName, "your_table_name").Scan(&count)
 	if err != nil {
-		return false, fmt.Errorf("failed to check if table exists: %w", err)
+		return false, err
 	}
 
 	return count > 0, nil

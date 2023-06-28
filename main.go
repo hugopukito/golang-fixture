@@ -44,7 +44,7 @@ func main() {
 }
 
 func loadConfig() {
-	err := godotenv.Load()
+	err := godotenv.Load(".fixture.env")
 	if err != nil {
 		log.Panicln(color.Red + "error loading .env file: " + err.Error() + color.Reset)
 	}

@@ -6,6 +6,7 @@ local type: uuid.UUID doesn't match with entity type: string on field and value:
 
 ## Features
 
+- Add not possible to have two same name_key for entities
 - Add date time creation, maybe modify the auto sql datetime creator, or create datetime with Go
  -> addFuncsToSpecialTypes
 - Implement nested structs

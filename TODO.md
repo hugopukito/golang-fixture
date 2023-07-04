@@ -11,4 +11,5 @@ local type: uuid.UUID doesn't match with entity type: string on field and value:
  -> addFuncsToSpecialTypes
 - Implement nested structs
 - Add random for string, int, etc.
+- Add {1..x} to create multiple entities
 - Add * to multiply base on multiple entities the entity

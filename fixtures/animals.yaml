@@ -1,6 +1,5 @@
 Dog:
   firstDog:
-    id: "cac1f1f1-bed4-4793-acf0-a68e2622e318"
     name: "chien1"
     breed: "bulldog"
     size: 3
@@ -12,10 +11,6 @@ Dog:
   thirdDog:
     name: "chien3"
     breed: "akita"
-
-  tina:
-    name: "tina"
-    breed: "grosse chienne"
 
 Cat:
   firstCat:

@@ -15,6 +15,6 @@ var goSQLTypeMap = map[string]string{
 	"float64":   "DOUBLE",
 	"bool":      "BOOL",
 	"string":    "VARCHAR(255)",
-	"time.Time": "DATETIME",
+	"time.Time": "TIMESTAMP",
 	"uuid.UUID": "VARCHAR(36)",
 }

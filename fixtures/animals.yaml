@@ -1,8 +1,10 @@
 Dog:
   firstDog:
+    id: cac1f1f1-bed4-4793-acf0-a68e2622e319
     name: "chien1"
     breed: "bulldog"
     size: 3
+    date: 2006-01-02 15:04:05
 
   secondDog:
     name: "chien2"

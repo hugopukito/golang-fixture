@@ -12,9 +12,18 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 var structMap = make(map[string]map[string]string)
+var specialTypes map[string]interface{}
+
+func init() {
+	specialTypes = make(map[string]interface{})
+	addFuncsToSpecialTypes()
+}
 
 func InitLocalStructs(pkgName string) {
 	err := getAllStructsInPackage(pkgName)
@@ -42,12 +51,44 @@ func CheckEntityOfStructIsValid(structName string, entity map[string]interface{}
 		}
 		fixtureType := reflect.TypeOf(value).Name()
 		if localType != fixtureType {
-			fmt.Println(color.Red+"local type: "+color.Orange+localType+color.Red+" doesn't match with entity type: "+color.Orange+fixtureType+color.Red+" on field and value: "+color.Orange+field+": "+value.(string)+color.Red+" for entity ->", entityName+color.Reset)
-			return false
+			if _func, ok := specialTypes[localType]; !(ok && _func.(func(interface{}) interface{})(value).(bool)) {
+				if _, isString := value.(string); !isString {
+					fmt.Println(color.Red+"local type: "+color.Orange+localType+color.Red+" doesn't match with entity type: "+color.Orange+fixtureType+color.Red+" on field: "+color.Orange+field+color.Red+" and unknown type value for entity ->", entityName+color.Reset)
+				} else {
+					fmt.Println(color.Red+"local type: "+color.Orange+localType+color.Red+" doesn't match with entity type: "+color.Orange+fixtureType+color.Red+" on field and value: "+color.Orange+field+": "+value.(string)+color.Red+" for entity ->", entityName+color.Reset)
+				}
+				return false
+			}
 		}
 	}
 
 	return true
+}
+
+func addFuncsToSpecialTypes() {
+	isUUID := func(obj interface{}) interface{} {
+		switch val := obj.(type) {
+		case string:
+			_, err := uuid.Parse(val)
+			return err == nil
+		default:
+			return false
+		}
+	}
+	specialTypes["uuid.UUID"] = isUUID
+
+	isTime := func(obj interface{}) interface{} {
+		switch val := obj.(type) {
+		case time.Time:
+			return true
+		case string:
+			_, err := time.Parse("2006-01-02 15:04:05", val)
+			return err == nil
+		default:
+			return false
+		}
+	}
+	specialTypes["time.Time"] = isTime
 }
 
 func getAllStructsInPackage(pkgName string) error {

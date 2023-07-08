@@ -5,6 +5,7 @@ import (
 	"fixture/color"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -23,7 +24,7 @@ func InsertEntity(structName string, entity map[string]interface{}, localStruct 
 
 	for k, v := range localStruct {
 		if _, exist := entity[k]; !exist {
-			if value, ok := specialTypes[k+"-"+v]; ok {
+			if value, ok := specialTypes[v]; ok {
 				columns = append(columns, k)
 				values = append(values, value.(func() interface{})())
 				placeholders = append(placeholders, "?")
@@ -92,8 +93,10 @@ func addFuncsToSpecialTypes() {
 	generateUUID := func() interface{} {
 		return uuid.New()
 	}
-	specialTypes["id-uuid"] = generateUUID
-	specialTypes["id-uuid.UUID"] = generateUUID
+	specialTypes["uuid.UUID"] = generateUUID
 
-	// TODO add date
+	generateTimeStamp := func() interface{} {
+		return time.Now()
+	}
+	specialTypes["time.Time"] = generateTimeStamp
 }

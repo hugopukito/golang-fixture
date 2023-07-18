@@ -8,13 +8,21 @@ import (
 )
 
 func ParseFixture(yamlFixture Fixture, dbName string) {
+	for structName := range yamlFixture.Entities {
+		localStruct, exist := GetLocalStructByName(structName)
+		if exist {
+			ensureTableIsCreated(structName, localStruct, dbName)
+		} else {
+			fmt.Println(color.Red+"Unknown struct ->", color.Orange, structName+"...")
+		}
+	}
+	fmt.Println()
 	for structName, entityMap := range yamlFixture.Entities {
 		localStruct, exist := GetLocalStructByName(structName)
 		if exist {
 			fmt.Println(color.Green+"Processing struct ->", color.Yellow, structName+"..."+color.Reset)
 			for entityName, fieldsAndValues := range entityMap {
 				if CheckEntityOfStructIsValid(structName, fieldsAndValues, entityName) {
-					ensureTableIsCreated(structName, localStruct, dbName)
 					err := database.InsertEntity(structName, fieldsAndValues, localStruct)
 					fmt.Println(color.Cyan+"Adding entity ->", color.Yellow, entityName+"..."+color.Reset)
 					if err != nil {
@@ -22,8 +30,6 @@ func ParseFixture(yamlFixture Fixture, dbName string) {
 					}
 				}
 			}
-		} else {
-			fmt.Println(color.Red+"Unknown struct ->", color.Orange, structName+"...")
 		}
 		fmt.Println()
 	}

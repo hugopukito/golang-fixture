@@ -17,6 +17,18 @@ func init() {
 	addFuncsToSpecialTypes()
 }
 
+func addFuncsToSpecialTypes() {
+	generateUUID := func() interface{} {
+		return uuid.New()
+	}
+	specialTypes["uuid.UUID"] = generateUUID
+
+	generateTimeStamp := func() interface{} {
+		return time.Now()
+	}
+	specialTypes["time.Time"] = generateTimeStamp
+}
+
 func InsertEntity(structName string, entity map[string]interface{}, localStruct map[string]string) error {
 	columns := make([]string, 0)
 	values := make([]interface{}, 0)
@@ -66,7 +78,7 @@ func CreateTable(tableName string, localStruct map[string]string) error {
 	idColumn := ""
 
 	for columnName, columnType := range localStruct {
-		sqlType, exist := goSQLTypeMap[columnType]
+		sqlType, exist := GoSQLTypeMap[columnType]
 		if !exist {
 			return errors.New(color.Red + "sql type for type: " + color.Orange + columnType + color.Red + " doesn't exist")
 		}
@@ -87,16 +99,4 @@ func CreateTable(tableName string, localStruct map[string]string) error {
 	}
 
 	return nil
-}
-
-func addFuncsToSpecialTypes() {
-	generateUUID := func() interface{} {
-		return uuid.New()
-	}
-	specialTypes["uuid.UUID"] = generateUUID
-
-	generateTimeStamp := func() interface{} {
-		return time.Now()
-	}
-	specialTypes["time.Time"] = generateTimeStamp
 }

@@ -25,6 +25,32 @@ func init() {
 	addFuncsToSpecialTypes()
 }
 
+func addFuncsToSpecialTypes() {
+	isUUID := func(obj interface{}) interface{} {
+		switch val := obj.(type) {
+		case string:
+			_, err := uuid.Parse(val)
+			return err == nil
+		default:
+			return false
+		}
+	}
+	specialTypes["uuid.UUID"] = isUUID
+
+	isTime := func(obj interface{}) interface{} {
+		switch val := obj.(type) {
+		case time.Time:
+			return true
+		case string:
+			_, err := time.Parse("2006-01-02 15:04:05", val)
+			return err == nil
+		default:
+			return false
+		}
+	}
+	specialTypes["time.Time"] = isTime
+}
+
 func InitLocalStructs(pkgName string) {
 	err := getAllStructsInPackage(pkgName)
 	if err != nil {
@@ -63,32 +89,6 @@ func CheckEntityOfStructIsValid(structName string, entity map[string]interface{}
 	}
 
 	return true
-}
-
-func addFuncsToSpecialTypes() {
-	isUUID := func(obj interface{}) interface{} {
-		switch val := obj.(type) {
-		case string:
-			_, err := uuid.Parse(val)
-			return err == nil
-		default:
-			return false
-		}
-	}
-	specialTypes["uuid.UUID"] = isUUID
-
-	isTime := func(obj interface{}) interface{} {
-		switch val := obj.(type) {
-		case time.Time:
-			return true
-		case string:
-			_, err := time.Parse("2006-01-02 15:04:05", val)
-			return err == nil
-		default:
-			return false
-		}
-	}
-	specialTypes["time.Time"] = isTime
 }
 
 func getAllStructsInPackage(pkgName string) error {

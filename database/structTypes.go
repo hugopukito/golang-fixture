@@ -1,6 +1,6 @@
 package database
 
-var goSQLTypeMap = map[string]string{
+var GoSQLTypeMap = map[string]string{
 	"int":       "INT",
 	"int8":      "TINYINT",
 	"int16":     "SMALLINT",

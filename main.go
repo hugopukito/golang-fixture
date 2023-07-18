@@ -29,7 +29,7 @@ func main() {
 	fmt.Println(color.Pink + "Testing connection to your sql..." + color.Reset)
 	database.InitDB(config.databaseName)
 
-	fmt.Println(color.Blue + "\nParsing your local strucs..." + color.Reset)
+	fmt.Println(color.Blue + "\nParsing your local structs..." + color.Reset)
 	funcs.InitLocalStructs(config.structsPackageName)
 
 	yamlFixtures, err := funcs.GetYamlStructs(config.fixtureDirName)

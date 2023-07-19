@@ -2,7 +2,7 @@
 
 ## Features
 
-- Add random for string, int, etc.
+- Add {random} for string, int, etc.
 
 - Implement nested structs
 - Permit {current} to be use as struct reference like dog_{current}

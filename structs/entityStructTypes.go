@@ -7,11 +7,11 @@ import (
 )
 
 type Dog struct {
-	ID    uuid.UUID
-	Name  string
-	Breed string
-	Size  int
-	Date  time.Time
+	ID      uuid.UUID
+	Name    string
+	Breed   string
+	Size    int
+	Created time.Time
 }
 
 type Cat struct {

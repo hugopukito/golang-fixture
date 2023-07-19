@@ -4,19 +4,19 @@ Dog:
     name: "chien1"
     breed: "bulldog"
     size: 3
-    date: 2006-01-02 15:04:05
+    created: 2006-01-02 15:04:05
 
   secondDog:
     name: "chien2"
     breed: "beagle"
 
-  thirdDog:
-    name: "chien3"
+  dogs{1..10}:
+    name: "chien{current}"
     breed: "akita"
 
 Cat:
-  cat{1..5}:
-    name: "chat1"
+  cat{1..10}:
+    name: "chat{current}"
     color: "orange"
 
 Turtle:

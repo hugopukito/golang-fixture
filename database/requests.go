@@ -4,6 +4,9 @@ import (
 	"errors"
 	"fixture/color"
 	"fmt"
+	"log"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -30,11 +33,12 @@ func addFuncsToSpecialTypes() {
 	specialTypes["time.Time"] = generateTimeStamp
 }
 
-func InsertEntity(structName string, entity map[string]interface{}, localStruct map[string]string) error {
+func InsertEntity(structName string, entity map[string]interface{}, localStruct map[string]string, occurrence int) error {
 	columns := make([]string, 0)
 	values := make([]interface{}, 0)
 	placeholders := make([]string, 0)
 
+	// Special types auto generated if present in localStruct but not in entity
 	for k, v := range localStruct {
 		if _, exist := entity[k]; !exist {
 			if value, ok := specialTypes[v]; ok {
@@ -45,15 +49,30 @@ func InsertEntity(structName string, entity map[string]interface{}, localStruct 
 		}
 	}
 
+	currentRegex, err := regexp.Compile(`\{current\}`)
+	if err != nil {
+		log.Println("Failed to compile regular expression:", err)
+	}
+
+	// Fields from entity
 	for column, value := range entity {
 		columns = append(columns, column)
-		values = append(values, value)
+		_, isString := value.(string)
+		if isString {
+			if currentRegex.MatchString(value.(string)) {
+				values = append(values, strings.ReplaceAll(value.(string), "{current}", strconv.Itoa(occurrence)))
+			} else {
+				values = append(values, value)
+			}
+		} else {
+			values = append(values, value)
+		}
 		placeholders = append(placeholders, "?")
 	}
 
 	query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", structName, strings.Join(columns, ", "), strings.Join(placeholders, ", "))
 
-	_, err := sqlConn.Exec(query, values...)
+	_, err = sqlConn.Exec(query, values...)
 	if err != nil {
 		return err
 	}

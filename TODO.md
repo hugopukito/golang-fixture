@@ -2,9 +2,10 @@
 
 ## Features
 
-- {x..y} permit to get those number in yaml to use it like `<current()>`
-- Implement nested structs
 - Add random for string, int, etc.
+
+- Implement nested structs
+- Permit {current} to be use as struct reference like dog_{current}
 - Add * to multiply base on multiple entities the entity (like getting all entities starting with dog*, create entities for each one)
 
 ## Later if necessary

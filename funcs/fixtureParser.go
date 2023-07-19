@@ -35,18 +35,19 @@ func createEntities(yamlFixture Fixture) {
 				if CheckEntityOfStructIsValid(structName, fieldsAndValues, entityName) {
 					digits, foundDigits := extractPatternDigits(entityName)
 					nbOfCreation := digits[1] - digits[0] + 1
+					startNumber := digits[0]
 					if nbOfCreation <= 0 {
 						fmt.Println(color.Red + "failed creating entity, bad {x..y} 0 or negative: " + color.Orange + entityName + color.Reset)
 					}
-					for i := 0; i < nbOfCreation; i++ {
-						err := database.InsertEntity(structName, fieldsAndValues, localStruct)
 
-						if foundDigits {
-							fmt.Println(color.Cyan+"Adding entity ->", color.Yellow, removePattern(entityName), i+1, "..."+color.Reset)
-						} else {
-							fmt.Println(color.Cyan+"Adding entity ->", color.Yellow, entityName+"..."+color.Reset)
-						}
+					if foundDigits {
+						fmt.Println(color.Cyan+"Adding entities ->", color.Yellow, removePattern(entityName), "from", digits[0], "to", digits[1], "..."+color.Reset)
+					} else {
+						fmt.Println(color.Cyan+"Adding entity ->", color.Yellow, entityName+"..."+color.Reset)
+					}
 
+					for i := startNumber; i < nbOfCreation+startNumber; i++ {
+						err := database.InsertEntity(structName, fieldsAndValues, localStruct, i)
 						if err != nil {
 							fmt.Println(color.Red+"failed creating entity: "+color.Orange+entityName, color.Red+err.Error()+color.Reset)
 						}

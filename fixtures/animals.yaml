@@ -15,12 +15,9 @@ Dog:
     breed: "akita"
 
 Cat:
-  firstCat:
+  cat{1..5}:
     name: "chat1"
     color: "orange"
-  secondCat:
-    name: "chat2"
-    color: "grey"
 
 Turtle:
   firstTurtle:

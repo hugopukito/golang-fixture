@@ -11,6 +11,7 @@ import (
 )
 
 var specialTypes map[string]interface{}
+var firstColumns = []string{"id", "uid", "uuid"}
 
 func init() {
 	specialTypes = make(map[string]interface{})
@@ -82,7 +83,8 @@ func CreateTable(tableName string, localStruct map[string]string) error {
 		if !exist {
 			return errors.New(color.Red + "sql type for type: " + color.Orange + columnType + color.Red + " doesn't exist")
 		}
-		if columnName == "id" {
+		// Just putting this on first column, doesn't change anything
+		if containsString(columnName) {
 			idColumn = fmt.Sprintf("%s %s", columnName, sqlType)
 		} else {
 			columns = append(columns, fmt.Sprintf("%s %s", columnName, sqlType))
@@ -99,4 +101,13 @@ func CreateTable(tableName string, localStruct map[string]string) error {
 	}
 
 	return nil
+}
+
+func containsString(target string) bool {
+	for _, element := range firstColumns {
+		if element == target {
+			return true
+		}
+	}
+	return false
 }

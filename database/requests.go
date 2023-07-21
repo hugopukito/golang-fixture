@@ -13,29 +13,29 @@ import (
 	"github.com/google/uuid"
 )
 
-var specialTypes map[string]interface{}
+var specialTypes map[string]any
 var firstColumns = []string{"id", "uid", "uuid"}
 
 func init() {
-	specialTypes = make(map[string]interface{})
+	specialTypes = make(map[string]any)
 	addFuncsToSpecialTypes()
 }
 
 func addFuncsToSpecialTypes() {
-	generateUUID := func() interface{} {
+	generateUUID := func() any {
 		return uuid.New()
 	}
 	specialTypes["uuid.UUID"] = generateUUID
 
-	generateTimeStamp := func() interface{} {
+	generateTimeStamp := func() any {
 		return time.Now()
 	}
 	specialTypes["time.Time"] = generateTimeStamp
 }
 
-func InsertEntity(structName string, entity map[string]interface{}, localStruct map[string]string, occurrence int) error {
+func InsertEntity(structName string, entity map[string]any, localStruct map[string]string, occurrence int) error {
 	columns := make([]string, 0)
-	values := make([]interface{}, 0)
+	values := make([]any, 0)
 	placeholders := make([]string, 0)
 
 	// Special types auto generated if present in localStruct but not in entity
@@ -43,7 +43,7 @@ func InsertEntity(structName string, entity map[string]interface{}, localStruct 
 		if _, exist := entity[k]; !exist {
 			if value, ok := specialTypes[v]; ok {
 				columns = append(columns, k)
-				values = append(values, value.(func() interface{})())
+				values = append(values, value.(func() any)())
 				placeholders = append(placeholders, "?")
 			}
 		}

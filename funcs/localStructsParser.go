@@ -18,15 +18,15 @@ import (
 )
 
 var structMap = make(map[string]map[string]string)
-var specialTypes map[string]interface{}
+var specialTypes map[string]any
 
 func init() {
-	specialTypes = make(map[string]interface{})
+	specialTypes = make(map[string]any)
 	addFuncsToSpecialTypes()
 }
 
 func addFuncsToSpecialTypes() {
-	isUUID := func(obj interface{}) interface{} {
+	isUUID := func(obj any) any {
 		switch val := obj.(type) {
 		case string:
 			_, err := uuid.Parse(val)
@@ -37,7 +37,7 @@ func addFuncsToSpecialTypes() {
 	}
 	specialTypes["uuid.UUID"] = isUUID
 
-	isTime := func(obj interface{}) interface{} {
+	isTime := func(obj any) any {
 		switch val := obj.(type) {
 		case time.Time:
 			return true
@@ -63,7 +63,7 @@ func GetLocalStructByName(structName string) (map[string]string, bool) {
 	return localStruct, ok
 }
 
-func CheckEntityOfStructIsValid(structName string, entity map[string]interface{}, entityName string) bool {
+func CheckEntityOfStructIsValid(structName string, entity map[string]any, entityName string) bool {
 	fieldsAndTypes, ok := structMap[structName]
 	if !ok {
 		fmt.Println(color.Red+"Unknown struct ->", color.Orange, structName+"..."+color.Reset)
@@ -77,7 +77,7 @@ func CheckEntityOfStructIsValid(structName string, entity map[string]interface{}
 		}
 		fixtureType := reflect.TypeOf(value).Name()
 		if localType != fixtureType {
-			if _func, ok := specialTypes[localType]; !(ok && _func.(func(interface{}) interface{})(value).(bool)) {
+			if _func, ok := specialTypes[localType]; !(ok && _func.(func(any) any)(value).(bool)) {
 				if _, isString := value.(string); !isString {
 					fmt.Println(color.Red+"local type: "+color.Orange+localType+color.Red+" doesn't match with entity type: "+color.Orange+fixtureType+color.Red+" on field: "+color.Orange+field+color.Red+" and unknown type value for entity ->", entityName+color.Reset)
 				} else {

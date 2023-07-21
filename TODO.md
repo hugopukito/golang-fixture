@@ -2,6 +2,8 @@
 
 ## Features
 
+Try replacing any by any
+
 - Add {random} for string, int, etc.
 
 - Implement nested structs

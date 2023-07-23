@@ -18,6 +18,9 @@ Cat:
   cat{1..10}:
     name: "chat{current}"
     color: "orange"
+  cat_random:
+    name: "{random{test2, test3, test4, test1}}"
+    color: "orange"
 
 Turtle:
   firstTurtle:

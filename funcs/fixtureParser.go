@@ -9,7 +9,10 @@ import (
 	"strconv"
 )
 
+var entityNames map[string]struct{}
+
 func ParseFixture(yamlFixture Fixture, dbName string) {
+	entityNames = make(map[string]struct{})
 	createTables(yamlFixture, dbName)
 	fmt.Print("\n")
 	createEntities(yamlFixture)
@@ -40,16 +43,27 @@ func createEntities(yamlFixture Fixture) {
 						fmt.Println(color.Red + "failed creating entity, bad {x..y} 0 or negative: " + color.Orange + entityName + color.Reset)
 					}
 
+					entityName = removePattern(entityName)
+
 					if foundDigits {
-						fmt.Println(color.Cyan+"Adding entities ->", color.Yellow, removePattern(entityName), "from", digits[0], "to", digits[1], "..."+color.Reset)
+						fmt.Println(color.Cyan+"Adding entities ->", color.Yellow, entityName, "from", digits[0], "to", digits[1], "..."+color.Reset)
 					} else {
 						fmt.Println(color.Cyan+"Adding entity ->", color.Yellow, entityName+"..."+color.Reset)
 					}
 
 					for i := startNumber; i < nbOfCreation+startNumber; i++ {
+						var entityNameNumberized string
+						if nbOfCreation == 1 && startNumber != 0 {
+							entityNameNumberized = entityName
+						} else {
+							entityNameNumberized = entityName + strconv.Itoa(i)
+						}
+						if !addAndCheckEntityName(entityNameNumberized) {
+							fmt.Println(color.Red + "entity name already taken: " + color.Orange + entityNameNumberized + color.Reset)
+						}
 						err := database.InsertEntity(structName, fieldsAndValues, localStruct, i)
 						if err != nil {
-							fmt.Println(color.Red+"failed creating entity: "+color.Orange+entityName, color.Red+err.Error()+color.Reset)
+							fmt.Println(color.Red+"failed creating entity: "+color.Orange+entityNameNumberized, color.Red+err.Error()+color.Reset)
 						}
 					}
 				}
@@ -70,6 +84,15 @@ func ensureTableIsCreated(structName string, localStruct map[string]string, dbNa
 			log.Panicln(color.Red+"failed creating table for structName: "+color.Orange+structName, color.Red+err.Error()+color.Reset)
 		}
 	}
+}
+
+func addAndCheckEntityName(entityName string) bool {
+	_, exists := entityNames[entityName]
+	if !exists {
+		entityNames[entityName] = struct{}{}
+		return true
+	}
+	return false
 }
 
 func extractPatternDigits(input string) ([2]int, bool) {

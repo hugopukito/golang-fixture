@@ -2,9 +2,8 @@
 
 ## Features
 
-Try replacing any by any
-
 - Add {random} for string, int, etc.
+ -> loop on randomValues to check if each value is convertible to right type
 
 - Implement nested structs
 - Permit {current} to be use as struct reference like dog_{current}

@@ -19,8 +19,9 @@ Cat:
     name: "chat{current}"
     color: "orange"
   cat_random:
-    name: "{random{test2, test3, test4, test1}}"
+    name: "random_tester"
     color: "orange"
+    tailLength: "{random{1.2, 1.4}}"
 
 Turtle:
   firstTurtle:

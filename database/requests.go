@@ -70,8 +70,8 @@ func InsertEntity(structName string, entity map[string]any, localStruct map[stri
 			} else if randomMatches := randomRegex.FindAllStringSubmatch(value.(string), -1); len(randomMatches) > 0 {
 				innerContent := randomMatches[0][1]
 				randomValues := splitAndTrim(innerContent, ",")
+				castValuesInGoodType(randomValues, localStruct[column])
 				values = append(values, getRandomElement(randomValues))
-				// loop randomValues with isConvertibleToType(randomVal, localStruct[column])
 			} else {
 				values = append(values, value)
 			}
@@ -166,25 +166,35 @@ func getRandomElement(strings []string) string {
 	return randomElement
 }
 
-func isConvertibleToType(value string, targetType string) bool {
-	switch targetType {
-	case "int", "int8", "int16", "int32", "int64":
-		_, err := strconv.ParseInt(value, 10, 64)
-		return err == nil
+func castValuesInGoodType(randomValues []string, targetType string) ([]any, error) {
+	typeChecker := make(map[string]func(string) (any, error))
 
-	case "uint", "uint8", "uint16", "uint32", "uint64":
-		_, err := strconv.ParseUint(value, 10, 64)
-		return err == nil
-
-	case "float32", "float64":
-		_, err := strconv.ParseFloat(value, 64)
-		return err == nil
-
-	case "bool":
-		_, err := strconv.ParseBool(value)
-		return err == nil
-
-	default:
-		return false
+	typeChecker["string"] = func(obj string) (any, error) {
+		return obj, nil
 	}
+	typeChecker["int"] = func(obj string) (any, error) {
+		return strconv.Atoi(obj)
+	}
+	typeChecker["float"] = func(obj string) (any, error) {
+		return strconv.ParseFloat(obj, 64)
+	}
+	typeChecker["bool"] = func(obj string) (any, error) {
+		return strconv.ParseBool(obj)
+	}
+
+	var values []any
+
+	for _, randomVal := range randomValues {
+		if _func, ok := typeChecker[targetType]; ok {
+			val, err := _func(randomVal)
+			if err != nil {
+				return nil, err
+			} else {
+				values = append(values, val)
+			}
+		}
+	}
+	fmt.Println(values)
+
+	return values, nil
 }

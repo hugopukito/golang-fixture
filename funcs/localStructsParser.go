@@ -18,15 +18,15 @@ import (
 )
 
 var structMap = make(map[string]map[string]string)
-var specialTypes map[string]any
+var specialTypes map[string]func(any) bool
 
 func init() {
-	specialTypes = make(map[string]any)
+	specialTypes = make(map[string]func(any) bool)
 	addFuncsToSpecialTypes()
 }
 
 func addFuncsToSpecialTypes() {
-	isUUID := func(obj any) any {
+	isUUID := func(obj any) bool {
 		switch val := obj.(type) {
 		case string:
 			_, err := uuid.Parse(val)
@@ -37,7 +37,7 @@ func addFuncsToSpecialTypes() {
 	}
 	specialTypes["uuid.UUID"] = isUUID
 
-	isTime := func(obj any) any {
+	isTime := func(obj any) bool {
 		switch val := obj.(type) {
 		case time.Time:
 			return true
@@ -77,10 +77,11 @@ func CheckEntityOfStructIsValid(structName string, entity map[string]any, entity
 		}
 		fixtureType := reflect.TypeOf(value).Name()
 		if localType != fixtureType {
-			if _func, ok := specialTypes[localType]; !(ok && _func.(func(any) any)(value).(bool)) {
+			if _func, ok := specialTypes[localType]; !(ok && _func(value)) {
 				if _, isString := value.(string); !isString {
 					fmt.Println(color.Red+"local type: "+color.Orange+localType+color.Red+" doesn't match with entity type: "+color.Orange+fixtureType+color.Red+" on field: "+color.Orange+field+color.Red+" and unknown type value for entity ->", entityName+color.Reset)
 				} else {
+					// TODO add contains random{} regex ...
 					fmt.Println(color.Red+"local type: "+color.Orange+localType+color.Red+" doesn't match with entity type: "+color.Orange+fixtureType+color.Red+" on field and value: "+color.Orange+field+": "+value.(string)+color.Red+" for entity ->", entityName+color.Reset)
 				}
 				return false
@@ -138,7 +139,11 @@ func getAllStructsInPackage(pkgName string) error {
 						fieldType := ""
 
 						for _, fieldNameIdent := range field.Names {
-							fieldName = strings.ToLower(fieldNameIdent.Name)
+							if fieldNameIdent.Name != "ID" {
+								fieldName = strings.ToLower(string(fieldNameIdent.Name[0])) + fieldNameIdent.Name[1:]
+							} else {
+								fieldName = strings.ToLower(fieldNameIdent.Name)
+							}
 						}
 
 						switch fieldTypeExpr := field.Type.(type) {

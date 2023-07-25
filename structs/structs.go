@@ -15,7 +15,8 @@ type Dog struct {
 }
 
 type Cat struct {
-	ID    uuid.UUID
-	Name  string
-	Color string
+	ID         uuid.UUID
+	Name       string
+	Color      string
+	TailLength float64
 }

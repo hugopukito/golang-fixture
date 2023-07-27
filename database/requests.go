@@ -16,10 +16,13 @@ import (
 
 var specialTypes map[string]any
 var firstColumns = []string{"id", "uid", "uuid"}
+var currentRegex *regexp.Regexp
+var randomRegex *regexp.Regexp
 
 func init() {
 	specialTypes = make(map[string]any)
 	addFuncsToSpecialTypes()
+	compileRegex()
 }
 
 func addFuncsToSpecialTypes() {
@@ -32,6 +35,18 @@ func addFuncsToSpecialTypes() {
 		return time.Now()
 	}
 	specialTypes["time.Time"] = generateTimeStamp
+}
+
+func compileRegex() {
+	currentRegex, err = regexp.Compile(`\{current\}`)
+	if err != nil {
+		log.Println("Failed to compile regular expression:", err)
+	}
+
+	randomRegex, err = regexp.Compile(`\{random\{([^}]*)\}\}`)
+	if err != nil {
+		log.Println("Failed to compile regular expression:", err)
+	}
 }
 
 func InsertEntity(structName string, entity map[string]any, localStruct map[string]string, occurrence int) error {
@@ -48,16 +63,6 @@ func InsertEntity(structName string, entity map[string]any, localStruct map[stri
 				placeholders = append(placeholders, "?")
 			}
 		}
-	}
-
-	currentRegex, err := regexp.Compile(`\{current\}`)
-	if err != nil {
-		log.Println("Failed to compile regular expression:", err)
-	}
-
-	randomRegex, err := regexp.Compile(`\{random\{([^}]*)\}\}`)
-	if err != nil {
-		log.Println("Failed to compile regular expression:", err)
 	}
 
 	// Fields from entity
@@ -175,7 +180,7 @@ func castValuesInGoodType(randomValues []string, targetType string) ([]any, erro
 	typeChecker["int"] = func(obj string) (any, error) {
 		return strconv.Atoi(obj)
 	}
-	typeChecker["float"] = func(obj string) (any, error) {
+	typeChecker["float64"] = func(obj string) (any, error) {
 		return strconv.ParseFloat(obj, 64)
 	}
 	typeChecker["bool"] = func(obj string) (any, error) {
@@ -194,7 +199,6 @@ func castValuesInGoodType(randomValues []string, targetType string) ([]any, erro
 			}
 		}
 	}
-	fmt.Println(values)
 
 	return values, nil
 }

@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -19,10 +20,20 @@ import (
 
 var structMap = make(map[string]map[string]string)
 var specialTypes map[string]func(any) bool
+var randomRegex *regexp.Regexp
 
 func init() {
 	specialTypes = make(map[string]func(any) bool)
 	addFuncsToSpecialTypes()
+	compileRegex()
+}
+
+func compileRegex() {
+	var err error
+	randomRegex, err = regexp.Compile(`\{random\{([^}]*)\}\}`)
+	if err != nil {
+		log.Println("Failed to compile regular expression:", err)
+	}
 }
 
 func addFuncsToSpecialTypes() {
@@ -81,8 +92,11 @@ func CheckEntityOfStructIsValid(structName string, entity map[string]any, entity
 				if _, isString := value.(string); !isString {
 					fmt.Println(color.Red+"local type: "+color.Orange+localType+color.Red+" doesn't match with entity type: "+color.Orange+fixtureType+color.Red+" on field: "+color.Orange+field+color.Red+" and unknown type value for entity ->", entityName+color.Reset)
 				} else {
-					// TODO add contains random{} regex ...
-					fmt.Println(color.Red+"local type: "+color.Orange+localType+color.Red+" doesn't match with entity type: "+color.Orange+fixtureType+color.Red+" on field and value: "+color.Orange+field+": "+value.(string)+color.Red+" for entity ->", entityName+color.Reset)
+					if randomRegex.MatchString(value.(string)) {
+						return true
+					} else {
+						fmt.Println(color.Red+"local type: "+color.Orange+localType+color.Red+" doesn't match with entity type: "+color.Orange+fixtureType+color.Red+" on field and value: "+color.Orange+field+": "+value.(string)+color.Red+" for entity ->", entityName+color.Reset)
+					}
 				}
 				return false
 			}

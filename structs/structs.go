@@ -18,5 +18,5 @@ type Cat struct {
 	ID         uuid.UUID
 	Name       string
 	Color      string
-	TailLength float64
+	TailLength bool
 }

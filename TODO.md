@@ -2,9 +2,7 @@
 
 ## Features
 
-- Add {random} for string, int, etc.
- -> loop on randomValues to check if each value is convertible to right type
-
+- Keep order when creating table (maybe look on localStruct)
 - Implement nested structs
  -> give id (if not specified, than will be write in sql) for each struct than needs id before starting inserting entities
 - Permit {current} to be use as struct reference like dog_{current}

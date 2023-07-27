@@ -21,7 +21,7 @@ Cat:
   cat_random:
     name: "random_tester"
     color: "orange"
-    tailLength: "{random{1.2, 1.4, 1.5, 1.6}}"
+    tailLength: "{random{}}"
 
 Turtle:
   # firstTurtle:

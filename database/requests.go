@@ -5,6 +5,7 @@ import (
 	"fixture/color"
 	"fmt"
 	"log"
+	"math"
 	"math/rand"
 	"regexp"
 	"strconv"
@@ -17,7 +18,8 @@ import (
 var specialTypes map[string]any
 var firstColumns = []string{"id", "uid", "uuid"}
 var currentRegex *regexp.Regexp
-var randomRegex *regexp.Regexp
+var randCommasRegex *regexp.Regexp
+var randRangeRegex *regexp.Regexp
 
 func init() {
 	specialTypes = make(map[string]any)
@@ -43,7 +45,12 @@ func compileRegex() {
 		log.Println("Failed to compile regular expression:", err)
 	}
 
-	randomRegex, err = regexp.Compile(`\{random\{([^}]*)\}\}`)
+	randCommasRegex, err = regexp.Compile(`\{random\{([^}]*)\}\}`)
+	if err != nil {
+		log.Println("Failed to compile regular expression:", err)
+	}
+
+	randRangeRegex, err = regexp.Compile(`\{random\{((?:\d+(?:\.\d+)?\.\.\d+(?:\.\d+)?))\}\}`)
 	if err != nil {
 		log.Println("Failed to compile regular expression:", err)
 	}
@@ -72,11 +79,27 @@ func InsertEntity(structName string, entity map[string]any, localStruct map[stri
 		if isString {
 			if currentRegex.MatchString(value.(string)) {
 				values = append(values, strings.ReplaceAll(value.(string), "{current}", strconv.Itoa(occurrence)))
-			} else if randomMatches := randomRegex.FindAllStringSubmatch(value.(string), -1); len(randomMatches) > 0 {
-				innerContent := randomMatches[0][1]
-				randomValues := splitAndTrim(innerContent, ",")
-				castValuesInGoodType(randomValues, localStruct[column])
-				values = append(values, getRandomElement(randomValues))
+			} else if randCommasMatches := randCommasRegex.FindAllStringSubmatch(value.(string), -1); len(randCommasMatches) > 0 {
+				if randRangeMatches := randRangeRegex.FindAllStringSubmatch(value.(string), -1); len(randRangeMatches) > 0 {
+					innerContent := randCommasMatches[0][1]
+					randomValues := splitAndTrim(innerContent, "..")
+					randomVal, err := generateRandom(randomValues, localStruct[column])
+					if err != nil {
+						return err
+					}
+					values = append(values, randomVal)
+				} else if strings.Contains(randCommasMatches[0][1], ",") {
+					innerContent := randCommasMatches[0][1]
+					randomValues := splitAndTrim(innerContent, ",")
+					//castValuesInGoodType(randomValues, localStruct[column])
+					values = append(values, getRandomElement(randomValues))
+				} else {
+					randomVal, err := generateRandom(nil, localStruct[column])
+					if err != nil {
+						return err
+					}
+					values = append(values, randomVal)
+				}
 			} else {
 				values = append(values, value)
 			}
@@ -171,34 +194,73 @@ func getRandomElement(strings []string) string {
 	return randomElement
 }
 
-func castValuesInGoodType(randomValues []string, targetType string) ([]any, error) {
-	typeChecker := make(map[string]func(string) (any, error))
-
-	typeChecker["string"] = func(obj string) (any, error) {
-		return obj, nil
-	}
-	typeChecker["int"] = func(obj string) (any, error) {
-		return strconv.Atoi(obj)
-	}
-	typeChecker["float64"] = func(obj string) (any, error) {
-		return strconv.ParseFloat(obj, 64)
-	}
-	typeChecker["bool"] = func(obj string) (any, error) {
-		return strconv.ParseBool(obj)
+func generateRandom(values []string, targetType string) (any, error) {
+	if targetType == "bool" {
+		rand.Seed(time.Now().UnixNano())
+		return rand.Intn(2) == 1, nil
+	} else if targetType == "int" || targetType == "float64" {
+		return generateRandomNumber(values, targetType)
 	}
 
-	var values []any
-
-	for _, randomVal := range randomValues {
-		if _func, ok := typeChecker[targetType]; ok {
-			val, err := _func(randomVal)
-			if err != nil {
-				return nil, err
-			} else {
-				values = append(values, val)
-			}
-		}
-	}
-
-	return values, nil
+	return nil, errors.New("can't generate random for type: " + targetType)
 }
+
+func generateRandomNumber(values []string, targetType string) (any, error) {
+	rand.Seed(time.Now().UnixNano())
+
+	if targetType == "int" {
+		first, err := strconv.Atoi(values[0])
+		if err != nil {
+			return nil, err
+		}
+		second, err := strconv.Atoi(values[1])
+		if err != nil {
+			return nil, err
+		}
+		return rand.Intn(second) + first, nil
+	} else if targetType == "float64" {
+		first, err := strconv.ParseFloat(values[0], 64)
+		if err != nil {
+			return nil, err
+		}
+		second, err := strconv.ParseFloat(values[1], 64)
+		if err != nil {
+			return nil, err
+		}
+		return math.Round((rand.Float64()*(second-first)+first)*100) / 100, nil
+	}
+
+	return nil, errors.New("problem with your random{x..y}")
+}
+
+// func castValuesInGoodType(randomValues []string, targetType string) ([]any, error) {
+// 	typeChecker := make(map[string]func(string) (any, error))
+
+// 	typeChecker["string"] = func(obj string) (any, error) {
+// 		return obj, nil
+// 	}
+// 	typeChecker["int"] = func(obj string) (any, error) {
+// 		return strconv.Atoi(obj)
+// 	}
+// 	typeChecker["float64"] = func(obj string) (any, error) {
+// 		return strconv.ParseFloat(obj, 64)
+// 	}
+// 	typeChecker["bool"] = func(obj string) (any, error) {
+// 		return strconv.ParseBool(obj)
+// 	}
+
+// 	var values []any
+
+// 	for _, randomVal := range randomValues {
+// 		if _func, ok := typeChecker[targetType]; ok {
+// 			val, err := _func(randomVal)
+// 			if err != nil {
+// 				return nil, err
+// 			} else {
+// 				values = append(values, val)
+// 			}
+// 		}
+// 	}
+
+// 	return values, nil
+// }

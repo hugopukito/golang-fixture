@@ -206,6 +206,9 @@ func generateRandom(values []string, targetType string) (any, error) {
 }
 
 func generateRandomNumber(values []string, targetType string) (any, error) {
+	if len(values) != 2 {
+		return nil, errors.New("need 2 values for {random{}}")
+	}
 	rand.Seed(time.Now().UnixNano())
 
 	if targetType == "int" {

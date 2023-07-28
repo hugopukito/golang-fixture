@@ -106,7 +106,7 @@ func InsertEntity(structName string, entity map[string]any, localStruct map[stri
 					values = append(values, randomVal)
 				}
 			} else if refMatches := refRegex.FindAllStringSubmatch(value.(string), -1); len(refMatches) > 0 {
-				fmt.Println("need to ref to the id by finding in the yaml the entity by nameId")
+				fmt.Println("need to ref to the id by finding in the yaml the entity by entityName")
 			} else {
 				values = append(values, value)
 			}

@@ -20,6 +20,7 @@ var primaryColumns = []string{"id", "uid", "uuid"}
 var currentRegex *regexp.Regexp
 var randCommasRegex *regexp.Regexp
 var randRangeRegex *regexp.Regexp
+var refRegex *regexp.Regexp
 
 func init() {
 	addFuncsToSpecialTypes()
@@ -41,17 +42,22 @@ func addFuncsToSpecialTypes() {
 func compileRegex() {
 	currentRegex, err = regexp.Compile(`\{current\}`)
 	if err != nil {
-		log.Println("Failed to compile regular expression:", err)
+		log.Fatalln("Failed to compile regular expression:", err)
 	}
 
 	randCommasRegex, err = regexp.Compile(`\{random\{([^}]*)\}\}`)
 	if err != nil {
-		log.Println("Failed to compile regular expression:", err)
+		log.Fatalln("Failed to compile regular expression:", err)
 	}
 
 	randRangeRegex, err = regexp.Compile(`\{random\{((?:\d+(?:\.\d+)?\.\.\d+(?:\.\d+)?))\}\}`)
 	if err != nil {
-		log.Println("Failed to compile regular expression:", err)
+		log.Fatalln("Failed to compile regular expression:", err)
+	}
+
+	refRegex, err = regexp.Compile(`{ref{([^}]*)}}`)
+	if err != nil {
+		log.Fatalln("Failed to compile regular expression:", err)
 	}
 }
 
@@ -99,6 +105,8 @@ func InsertEntity(structName string, entity map[string]any, localStruct map[stri
 					}
 					values = append(values, randomVal)
 				}
+			} else if refMatches := refRegex.FindAllStringSubmatch(value.(string), -1); len(refMatches) > 0 {
+				fmt.Println("need to ref to the id by finding in the yaml the entity by nameId")
 			} else {
 				values = append(values, value)
 			}

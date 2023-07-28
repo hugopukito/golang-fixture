@@ -24,10 +24,10 @@ Cat:
   #   tailLength: "{random{1..100}}"
   cat_nested:
     name: "nested"
-    info: "@info"
+    info: "{ref{myInfo}}"
 
 Info:
-  info:
+  myInfo:
     text: "some text"
 
 # Turtle:

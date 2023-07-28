@@ -19,4 +19,10 @@ type Cat struct {
 	Name       string
 	Color      string
 	TailLength int
+	Info       Info
+}
+
+type Info struct {
+	ID   uuid.UUID
+	Text string
 }

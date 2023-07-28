@@ -16,6 +16,7 @@ import (
 )
 
 var specialTypes = make(map[string]any)
+var primaryColumns = []string{"id", "uid", "uuid"}
 var currentRegex *regexp.Regexp
 var randCommasRegex *regexp.Regexp
 var randRangeRegex *regexp.Regexp
@@ -129,16 +130,34 @@ func CheckTableExist(tableName string, dbName string) (bool, error) {
 	return count > 0, nil
 }
 
-func CreateTable(tableName string, localStruct map[string]string, localStructOrdered []string) error {
+func CreateTable(tableName string, localStructs map[string]map[string]string, localStructOrdered []string) error {
 	fmt.Println(color.Purple+"Creating table ->", color.Yellow, tableName+"..."+color.Reset)
-	columns := make([]string, 0, len(localStruct))
+	columns := make([]string, 0, len(localStructs[tableName]))
 
 	for _, columnName := range localStructOrdered {
-		columnType := localStruct[columnName]
+		columnType := localStructs[tableName][columnName]
 
 		sqlType, exist := GoSQLTypeMap[columnType]
 		if !exist {
-			return errors.New(color.Red + "sql type for type: " + color.Orange + columnType + color.Red + " doesn't exist")
+			structType, structTypeExist := localStructs[columnName]
+			if structTypeExist {
+				structTypeKeys := make([]string, 0, len(structType))
+				for structTypekey := range structType {
+					structTypeKeys = append(structTypeKeys, structTypekey)
+				}
+				if primaryColumn := doesContainsPrimaryColumn(structTypeKeys); primaryColumn != "" {
+					if structFieldType, ok := GoSQLTypeMap[structType[primaryColumn]]; ok {
+						columns = append(columns, fmt.Sprintf("%s %s", columnName+"_id", structFieldType))
+						continue
+					} else {
+						return errors.New(color.Red + "sql type for type: " + color.Orange + columnType + color.Red + " doesn't exist")
+					}
+				} else {
+					return errors.New(color.Red + "no primary key in " + "[" + strings.Join(primaryColumns, ", ") + "]" + " for struct: " + color.Orange + columnName)
+				}
+			} else {
+				return errors.New(color.Red + "sql type for type: " + color.Orange + columnType + color.Red + " doesn't exist")
+			}
 		}
 		columns = append(columns, fmt.Sprintf("%s %s", columnName, sqlType))
 	}
@@ -219,34 +238,13 @@ func generateRandomNumber(values []string, targetType string) (any, error) {
 	return nil, errors.New("problem with your random{x..y}")
 }
 
-// func castValuesInGoodType(randomValues []string, targetType string) ([]any, error) {
-// 	typeChecker := make(map[string]func(string) (any, error))
-
-// 	typeChecker["string"] = func(obj string) (any, error) {
-// 		return obj, nil
-// 	}
-// 	typeChecker["int"] = func(obj string) (any, error) {
-// 		return strconv.Atoi(obj)
-// 	}
-// 	typeChecker["float64"] = func(obj string) (any, error) {
-// 		return strconv.ParseFloat(obj, 64)
-// 	}
-// 	typeChecker["bool"] = func(obj string) (any, error) {
-// 		return strconv.ParseBool(obj)
-// 	}
-
-// 	var values []any
-
-// 	for _, randomVal := range randomValues {
-// 		if _func, ok := typeChecker[targetType]; ok {
-// 			val, err := _func(randomVal)
-// 			if err != nil {
-// 				return nil, err
-// 			} else {
-// 				values = append(values, val)
-// 			}
-// 		}
-// 	}
-
-// 	return values, nil
-// }
+func doesContainsPrimaryColumn(slice []string) string {
+	for _, v1 := range slice {
+		for _, v2 := range primaryColumns {
+			if v1 == v2 {
+				return v1
+			}
+		}
+	}
+	return ""
+}

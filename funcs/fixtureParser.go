@@ -1,10 +1,10 @@
 package funcs
 
 import (
+	"errors"
 	"fixture/color"
 	"fixture/database"
 	"fmt"
-	"log"
 	"regexp"
 	"strconv"
 )
@@ -13,21 +13,28 @@ var entityNames map[string]struct{}
 
 func ParseFixture(yamlFixture Fixture, dbName string) {
 	entityNames = make(map[string]struct{})
-	createTables(yamlFixture, dbName)
+	err := createTables(yamlFixture, dbName)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	fmt.Print("\n")
 	createEntities(yamlFixture)
 }
 
-func createTables(yamlFixture Fixture, dbName string) {
+func createTables(yamlFixture Fixture, dbName string) error {
 	for structName := range yamlFixture.Entities {
-		localStruct, exist := GetLocalStructByName(structName)
-		localStructOrdered, exist2 := GetLocalStructOrderByName(structName)
-		if exist && exist2 {
-			ensureTableIsCreated(structName, localStruct, localStructOrdered, dbName)
+		localStructOrdered, exist := GetLocalStructOrderByName(structName)
+		if exist {
+			err := ensureTableIsCreated(structName, localStructOrdered, dbName)
+			if err != nil {
+				return errors.New(color.Red + "failed creating table for structName: " + color.Orange + structName + " " + color.Red + err.Error() + color.Reset)
+			}
 		} else {
-			fmt.Println(color.Red+"Unknown struct ->", color.Orange, structName+"...")
+			return errors.New(color.Red + "Unknown struct ->" + color.Orange + structName + "...")
 		}
 	}
+	return nil
 }
 
 func createEntities(yamlFixture Fixture) {
@@ -74,17 +81,18 @@ func createEntities(yamlFixture Fixture) {
 	}
 }
 
-func ensureTableIsCreated(structName string, localStruct map[string]string, localStructOrdered []string, dbName string) {
+func ensureTableIsCreated(structName string, localStructOrdered []string, dbName string) error {
 	exist, err := database.CheckTableExist(structName, dbName)
 	if err != nil {
-		log.Panicln(color.Red+"failed creating table for structName: "+color.Orange+structName, color.Red+err.Error()+color.Reset)
+		return err
 	}
 	if !exist {
-		err = database.CreateTable(structName, localStruct, localStructOrdered)
+		err = database.CreateTable(structName, structMap, localStructOrdered)
 		if err != nil {
-			log.Panicln(color.Red+"failed creating table for structName: "+color.Orange+structName, color.Red+err.Error()+color.Reset)
+			return err
 		}
 	}
+	return nil
 }
 
 func addAndCheckEntityName(entityName string) bool {

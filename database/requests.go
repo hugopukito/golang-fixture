@@ -15,14 +15,12 @@ import (
 	"github.com/google/uuid"
 )
 
-var specialTypes map[string]any
-var firstColumns = []string{"id", "uid", "uuid"}
+var specialTypes = make(map[string]any)
 var currentRegex *regexp.Regexp
 var randCommasRegex *regexp.Regexp
 var randRangeRegex *regexp.Regexp
 
 func init() {
-	specialTypes = make(map[string]any)
 	addFuncsToSpecialTypes()
 	compileRegex()
 }
@@ -131,27 +129,21 @@ func CheckTableExist(tableName string, dbName string) (bool, error) {
 	return count > 0, nil
 }
 
-func CreateTable(tableName string, localStruct map[string]string) error {
+func CreateTable(tableName string, localStruct map[string]string, localStructOrdered []string) error {
 	fmt.Println(color.Purple+"Creating table ->", color.Yellow, tableName+"..."+color.Reset)
 	columns := make([]string, 0, len(localStruct))
-	idColumn := ""
 
-	for columnName, columnType := range localStruct {
+	for _, columnName := range localStructOrdered {
+		columnType := localStruct[columnName]
+
 		sqlType, exist := GoSQLTypeMap[columnType]
 		if !exist {
 			return errors.New(color.Red + "sql type for type: " + color.Orange + columnType + color.Red + " doesn't exist")
 		}
-		// Just putting this on first column, doesn't change anything
-		if containsString(columnName) {
-			idColumn = fmt.Sprintf("%s %s", columnName, sqlType)
-		} else {
-			columns = append(columns, fmt.Sprintf("%s %s", columnName, sqlType))
-		}
+		columns = append(columns, fmt.Sprintf("%s %s", columnName, sqlType))
 	}
 
-	allColumns := append([]string{idColumn}, columns...)
-
-	query := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (%s)", tableName, strings.Join(allColumns, ", "))
+	query := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (%s)", tableName, strings.Join(columns, ", "))
 
 	_, err := sqlConn.Exec(query)
 	if err != nil {
@@ -159,15 +151,6 @@ func CreateTable(tableName string, localStruct map[string]string) error {
 	}
 
 	return nil
-}
-
-func containsString(target string) bool {
-	for _, element := range firstColumns {
-		if element == target {
-			return true
-		}
-	}
-	return false
 }
 
 func splitAndTrim(input, sep string) []string {

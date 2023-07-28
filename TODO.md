@@ -2,9 +2,6 @@
 
 ## Features
 
-- Keep order when creating table (maybe look on localStruct)
- -> dans localStructsParser, faire un slice qui garde l'ordre des noms des tables (Cat, Dog) 
-    et un sous slice pour l'ordre des colonnes (id, name)
 - Implement nested structs
  -> give id (if not specified, than will be write in sql) for each struct than needs id before starting inserting entities
 - Permit {current} to be use as struct reference like dog_{current}
@@ -12,4 +9,5 @@
 
 ## Later if necessary
 
+- Do loading bar when lots of entities that take more that 1s to create
 - Add primary key

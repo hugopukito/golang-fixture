@@ -19,11 +19,11 @@ import (
 )
 
 var structMap = make(map[string]map[string]string)
-var specialTypes map[string]func(any) bool
+var structOrdered = make(map[string][]string)
+var specialTypes = make(map[string]func(any) bool)
 var randomRegex *regexp.Regexp
 
 func init() {
-	specialTypes = make(map[string]func(any) bool)
 	addFuncsToSpecialTypes()
 	compileRegex()
 }
@@ -72,6 +72,11 @@ func InitLocalStructs(pkgName string) {
 func GetLocalStructByName(structName string) (map[string]string, bool) {
 	localStruct, ok := structMap[structName]
 	return localStruct, ok
+}
+
+func GetLocalStructOrderByName(structName string) ([]string, bool) {
+	localStructOrdered, ok := structOrdered[structName]
+	return localStructOrdered, ok
 }
 
 func CheckEntityOfStructIsValid(structName string, entity map[string]any, entityName string) bool {
@@ -168,8 +173,8 @@ func getAllStructsInPackage(pkgName string) error {
 						}
 
 						fieldMap[fieldName] = fieldType
+						structOrdered[structName] = append(structOrdered[structName], fieldName)
 					}
-
 					structMap[structName] = fieldMap
 				}
 			}

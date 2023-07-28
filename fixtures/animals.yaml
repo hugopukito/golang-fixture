@@ -1,21 +1,21 @@
 Dog:
-  firstDog:
-    id: cac1f1f1-bed4-4793-acf0-a68e2622e319
-    name: "chien seul {current}"
-    breed: "bulldog"
-    size: 3:
-    created: 2006-01-02 15:04:05
+  # firstDog:
+  #   id: cac1f1f1-bed4-4793-acf0-a68e2622e319
+  #   name: "chien seul {current}"
+  #   breed: "bulldog"
+  #   size: 3
+  #   created: 2006-01-02 15:04:05
 
   secondDog:
     name: "chien2"
     breed: "beagle"
 
-  dogs{1..10}:
+  dogs{1..5}:
     name: "chien{current}"
     breed: "akita"
 
 Cat:
-  cat{1..2000}:
+  cat{1..10}:
     name: "chat{current}"
     color: "orange"
   cat_random:

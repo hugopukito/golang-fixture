@@ -21,8 +21,9 @@ func ParseFixture(yamlFixture Fixture, dbName string) {
 func createTables(yamlFixture Fixture, dbName string) {
 	for structName := range yamlFixture.Entities {
 		localStruct, exist := GetLocalStructByName(structName)
-		if exist {
-			ensureTableIsCreated(structName, localStruct, dbName)
+		localStructOrdered, exist2 := GetLocalStructOrderByName(structName)
+		if exist && exist2 {
+			ensureTableIsCreated(structName, localStruct, localStructOrdered, dbName)
 		} else {
 			fmt.Println(color.Red+"Unknown struct ->", color.Orange, structName+"...")
 		}
@@ -73,13 +74,13 @@ func createEntities(yamlFixture Fixture) {
 	}
 }
 
-func ensureTableIsCreated(structName string, localStruct map[string]string, dbName string) {
+func ensureTableIsCreated(structName string, localStruct map[string]string, localStructOrdered []string, dbName string) {
 	exist, err := database.CheckTableExist(structName, dbName)
 	if err != nil {
 		log.Panicln(color.Red+"failed creating table for structName: "+color.Orange+structName, color.Red+err.Error()+color.Reset)
 	}
 	if !exist {
-		err = database.CreateTable(structName, localStruct)
+		err = database.CreateTable(structName, localStruct, localStructOrdered)
 		if err != nil {
 			log.Panicln(color.Red+"failed creating table for structName: "+color.Orange+structName, color.Red+err.Error()+color.Reset)
 		}

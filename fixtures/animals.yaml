@@ -3,7 +3,7 @@ Dog:
     id: cac1f1f1-bed4-4793-acf0-a68e2622e319
     name: "chien seul {current}"
     breed: "bulldog"
-    size: 3
+    size: 3:
     created: 2006-01-02 15:04:05
 
   secondDog:

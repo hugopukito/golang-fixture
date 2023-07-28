@@ -2,7 +2,6 @@ package funcs
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -35,13 +34,12 @@ func GetYamlStructs(pkgName string) ([]Fixture, error) {
 
 		yamlFile, err := os.ReadFile(filePath)
 		if err != nil {
-			fmt.Println("Error reading YAML file:", err)
-			continue
+			return nil, err
 		}
 
 		err = yaml.Unmarshal(yamlFile, &yamlFixture)
 		if err != nil {
-			fmt.Println("Error unmarshaling YAML:", err)
+			return nil, err
 		}
 
 		newMap := make(map[string]Entity, len(yamlFixture.Entities))

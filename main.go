@@ -1,11 +1,11 @@
 package main
 
 import (
+	"errors"
 	"fixture/color"
 	"fixture/database"
 	"fixture/funcs"
 	"fmt"
-	"log"
 	"os"
 	"reflect"
 	"strings"
@@ -24,7 +24,10 @@ var config *Config
 func main() {
 
 	fmt.Println(color.Blue + "Parsing your config.conf file...\n" + color.Reset)
-	loadConfig()
+	err := loadConfig()
+	if err != nil {
+		fmt.Println(color.Red + "error loading .env file: " + err.Error() + color.Reset)
+	}
 
 	fmt.Println(color.Pink + "Testing connection to your sql..." + color.Reset)
 	database.InitDB(config.databaseName)
@@ -34,7 +37,8 @@ func main() {
 
 	yamlFixtures, err := funcs.GetYamlStructs(config.fixtureDirName)
 	if err != nil {
-		log.Panicln(color.Red + "GetYamlStructs err: " + err.Error() + color.Reset)
+		fmt.Println(color.Red + "GetYamlStructs err: " + err.Error() + color.Reset)
+		return
 	}
 
 	fmt.Println(color.Purple + "Parsing your fixtures... \n" + color.Reset)
@@ -43,10 +47,10 @@ func main() {
 	}
 }
 
-func loadConfig() {
+func loadConfig() error {
 	err := godotenv.Load(".fixture.env")
 	if err != nil {
-		log.Panicln(color.Red + "error loading .env file: " + err.Error() + color.Reset)
+		return err
 	}
 
 	config = &Config{
@@ -55,7 +59,11 @@ func loadConfig() {
 		fixtureDirName:     getEnv("fixture_dir_name"),
 	}
 
-	checkMissingParams(config)
+	err = checkMissingParams(config)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func getEnv(key string) string {
@@ -66,7 +74,7 @@ func getEnv(key string) string {
 	return value
 }
 
-func checkMissingParams(cfg *Config) {
+func checkMissingParams(cfg *Config) error {
 	missingParams := []string{}
 	configType := reflect.TypeOf(*cfg)
 
@@ -80,6 +88,7 @@ func checkMissingParams(cfg *Config) {
 	}
 
 	if len(missingParams) > 0 {
-		log.Panicln(color.Red + "error missing config parameter(s): " + strings.Join(missingParams, ", ") + color.Reset)
+		return errors.New("error missing config parameter(s): " + strings.Join(missingParams, ", "))
 	}
+	return nil
 }

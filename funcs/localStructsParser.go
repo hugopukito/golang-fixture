@@ -69,8 +69,8 @@ func addFuncsToSpecialTypes() {
 	specialTypes["time.Time"] = isTime
 }
 
-func InitLocalStructs(pkgName string) {
-	err := getAllStructsInPackage(pkgName)
+func InitLocalStructs(structsFolder string) {
+	err := getAllStructsInPackage(structsFolder)
 	if err != nil {
 		log.Panicln(color.Red + "getAllStructsInPackage err: " + err.Error() + color.Reset)
 	}
@@ -118,12 +118,13 @@ func CheckEntityOfStructIsValid(structName string, entity map[string]any, entity
 	return true
 }
 
-func getAllStructsInPackage(pkgName string) error {
+func getAllStructsInPackage(structsFolder string) error {
 	wd, err := os.Getwd()
 	if err != nil {
 		return errors.New("Error getting current working directory: " + err.Error())
 	}
-	structDir := wd + "/" + pkgName
+
+	structDir := wd + "/" + structsFolder
 
 	files, err := os.ReadDir(structDir)
 	if err != nil {

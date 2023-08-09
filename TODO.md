@@ -6,6 +6,8 @@ Add logic to package working
  -> Variables from env
  -> Work with path to get yaml and structs
 
+Add possibility to use multiple folders where entities are
+
 ## Features
 
 - Implement nested structs

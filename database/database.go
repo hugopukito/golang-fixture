@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"text/template"
 
@@ -27,12 +28,13 @@ func InitDB(dbName string) {
 	fmt.Println(color.Pink + "drop database " + color.Yellow + dbName + color.Pink + " if exists..." + color.Reset)
 	fmt.Println(color.Pink + "create database " + color.Yellow + dbName + color.Pink + " if not exists..." + color.Reset)
 
-	wd, err := os.Getwd()
-	if err != nil {
-		log.Panicln(color.Red + "Failed to get the current working directory: " + err.Error() + color.Reset)
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		fmt.Println("Failed to get caller information")
+		return
 	}
 
-	scriptFile := filepath.Join(wd, "/database/reset.sql")
+	scriptFile := filepath.Join(filepath.Dir(filename), "/reset.sql")
 
 	scriptContent, err := os.ReadFile(scriptFile)
 	if err != nil {

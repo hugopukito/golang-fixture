@@ -24,7 +24,7 @@ Cat:
   #   tailLength: "{random{1..100}}"
   cat_nested:
     name: "nested"
-    info: "{ref{myInfo}}"
+    # info: "{ref{myInfo}}"
 
 Info:
   myInfo:

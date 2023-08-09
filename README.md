@@ -3,7 +3,9 @@
 ## Goal
 
 Create a database with the type structs defined for your entities in your project.
+
 Verify that all the fields for your yaml entities match with local structs defined in your project.
+
 Insert all the entities you described in yaml files
 
 ## Description

@@ -32,11 +32,16 @@ func main() {
 }
 ```
 
-Do ```bash go mod init 'your-project-name'```
+Do ```bash 
+go mod init 'your-project-name'
+```
+Then ```bash
+go get github.com/hugopukito/golang-fixture
+```
 
 Then create a folder that will contains entities in yaml (in the example) 'my-fixtures'
 
-Create a yaml file name as you want and insert entity that match struct from your project (Info struct in the example)
+Create a yaml file name it as you want and insert entity that match struct from your project (Info struct in the example)
 
 ```yaml
 Info:
@@ -44,4 +49,6 @@ Info:
     text: "some text"
 ```
 
-Then do ```bash go run main.go```
+Then do ```bash 
+go run main.go
+```

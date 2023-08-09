@@ -32,6 +32,12 @@ func main() {
 }
 ```
 
+The 'RunFixtures' func takes two parameters:
+
+- databaseName: Choose the database name that will be used ⚠️ or deleted if exist.
+- fixtureDirName: Give the location of your yaml files that describes entities.
+
+
 Do
 ```bash 
 go mod init 'your-project-name'
@@ -52,7 +58,7 @@ Info:
     text: "some text"
 ```
 
-Then do 
+Run it
 ```bash 
 go run main.go
 ```

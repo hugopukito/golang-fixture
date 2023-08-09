@@ -1,4 +1,4 @@
-package main
+package fixture
 
 import (
 	"fmt"
@@ -8,11 +8,11 @@ import (
 	"github.com/hugopukito/golang-fixture/funcs"
 )
 
-func main() {
-	runFixtures("fixture", "structs", "fixtures")
-}
+// func main() {
+// 	RunFixtures("db-fixture", "structs", "fixtures")
+// }
 
-func runFixtures(databaseName, structsPackageName, fixtureDirName string) {
+func RunFixtures(databaseName, structsPackageName, fixtureDirName string) {
 
 	fmt.Println(color.Pink + "Testing connection to your sql..." + color.Reset)
 	database.InitDB(databaseName)

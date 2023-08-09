@@ -12,7 +12,7 @@ Insert all the entities you described in yaml files
 
 This package will load yaml file, verify if each entity match with local structs of your project and insert rows in your database.
 
-The entities in yaml files are named fixture.
+The entities in yaml files are named fixtures.
 
 ## Example
 

@@ -69,8 +69,8 @@ func addFuncsToSpecialTypes() {
 	specialTypes["time.Time"] = isTime
 }
 
-func InitLocalStructs(structsFolder string) {
-	err := getAllStructsInPackage(structsFolder)
+func InitLocalStructs() {
+	err := getAllStructsInPackage()
 	if err != nil {
 		log.Panicln(color.Red + "getAllStructsInPackage err: " + err.Error() + color.Reset)
 	}
@@ -118,76 +118,82 @@ func CheckEntityOfStructIsValid(structName string, entity map[string]any, entity
 	return true
 }
 
-func getAllStructsInPackage(structsFolder string) error {
+func getAllStructsInPackage() error {
 	wd, err := os.Getwd()
 	if err != nil {
 		return errors.New("Error getting current working directory: " + err.Error())
 	}
 
-	structDir := wd + "/" + structsFolder
+	structDir := wd + "/"
 
-	files, err := os.ReadDir(structDir)
+	err = filepath.WalkDir(structDir, visitFile)
 	if err != nil {
-		return errors.New("Error reading directory: " + err.Error())
+		return err
 	}
 
-	for _, file := range files {
-		if !file.IsDir() {
-			filePath := filepath.Join(structDir, file.Name())
+	return nil
+}
 
-			fset := token.NewFileSet()
-			file, err := parser.ParseFile(fset, filePath, nil, parser.ParseComments)
-			if err != nil {
-				log.Panicln(color.Red + "getAllStructsInPackage ParseFile err: " + err.Error() + color.Reset)
+func visitFile(fp string, fi os.DirEntry, err error) error {
+	if err != nil {
+		return err
+	}
+	if fi.IsDir() || !strings.HasSuffix(fi.Name(), ".go") {
+		return nil
+	}
+
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, fp, nil, parser.ParseComments)
+	if err != nil {
+		log.Panicln(color.Red + "getAllStructsInPackage ParseFile err: " + err.Error() + color.Reset)
+	}
+
+	for _, decl := range file.Decls {
+		genDecl, ok := decl.(*ast.GenDecl)
+		if !ok || genDecl.Tok != token.TYPE {
+			continue
+		}
+
+		for _, spec := range genDecl.Specs {
+			typeSpec, ok := spec.(*ast.TypeSpec)
+			if !ok {
+				continue
 			}
 
-			for _, decl := range file.Decls {
-				genDecl, ok := decl.(*ast.GenDecl)
-				if !ok || genDecl.Tok != token.TYPE {
-					continue
-				}
+			structName := strings.ToLower(typeSpec.Name.Name)
+			fieldMap := make(map[string]string)
 
-				for _, spec := range genDecl.Specs {
-					typeSpec, ok := spec.(*ast.TypeSpec)
-					if !ok {
-						continue
-					}
-
-					structName := strings.ToLower(typeSpec.Name.Name)
-					fieldMap := make(map[string]string)
-
-					structType, ok := typeSpec.Type.(*ast.StructType)
-					if !ok {
-						continue
-					}
-
-					for _, field := range structType.Fields.List {
-						fieldName := ""
-						fieldType := ""
-
-						for _, fieldNameIdent := range field.Names {
-							if fieldNameIdent.Name != "ID" {
-								fieldName = strings.ToLower(string(fieldNameIdent.Name[0])) + fieldNameIdent.Name[1:]
-							} else {
-								fieldName = strings.ToLower(fieldNameIdent.Name)
-							}
-						}
-
-						switch fieldTypeExpr := field.Type.(type) {
-						case *ast.Ident:
-							fieldType = fieldTypeExpr.Name
-						case *ast.SelectorExpr:
-							fieldType = getFullSelectorExpr(fieldTypeExpr)
-						}
-
-						fieldMap[fieldName] = fieldType
-						structOrdered[structName] = append(structOrdered[structName], fieldName)
-					}
-					structMap[structName] = fieldMap
-				}
+			structType, ok := typeSpec.Type.(*ast.StructType)
+			if !ok {
+				continue
 			}
+
+			for _, field := range structType.Fields.List {
+				fieldName := ""
+				fieldType := ""
+
+				for _, fieldNameIdent := range field.Names {
+					if fieldNameIdent.Name != "ID" {
+						fieldName = strings.ToLower(string(fieldNameIdent.Name[0])) + fieldNameIdent.Name[1:]
+					} else {
+						fieldName = strings.ToLower(fieldNameIdent.Name)
+					}
+				}
+
+				switch fieldTypeExpr := field.Type.(type) {
+				case *ast.Ident:
+					fieldType = fieldTypeExpr.Name
+				case *ast.SelectorExpr:
+					fieldType = getFullSelectorExpr(fieldTypeExpr)
+				}
+
+				fieldMap[fieldName] = fieldType
+				structOrdered[structName] = append(structOrdered[structName], fieldName)
+			}
+			structMap[structName] = fieldMap
 		}
 	}
+
 	return nil
 }
 

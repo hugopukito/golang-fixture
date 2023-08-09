@@ -8,13 +8,13 @@ import (
 	"github.com/hugopukito/golang-fixture/funcs"
 )
 
-func RunFixtures(databaseName, structsFolder, fixtureDirName string) {
+func RunFixtures(databaseName, fixtureDirName string) {
 
 	fmt.Println(color.Pink + "Testing connection to your sql..." + color.Reset)
 	database.InitDB(databaseName)
 
 	fmt.Println(color.Blue + "\nParsing your local structs..." + color.Reset)
-	funcs.InitLocalStructs(structsFolder)
+	funcs.InitLocalStructs()
 
 	yamlFixtures, err := funcs.GetYamlStructs(fixtureDirName)
 	if err != nil {

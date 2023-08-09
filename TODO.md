@@ -1,5 +1,9 @@
 # TODO
 
+## Readme
+
+Finish explaining yaml logic and special types logic
+
 ## Features
 
 - Implement nested structs

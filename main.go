@@ -2,13 +2,14 @@ package main
 
 import (
 	"errors"
-	"fixture/color"
-	"fixture/database"
-	"fixture/funcs"
 	"fmt"
 	"os"
 	"reflect"
 	"strings"
+
+	"github.com/hugopukito/golang-fixture/color"
+	"github.com/hugopukito/golang-fixture/database"
+	"github.com/hugopukito/golang-fixture/funcs"
 
 	"github.com/joho/godotenv"
 )

@@ -2,7 +2,6 @@ package database
 
 import (
 	"errors"
-	"fixture/color"
 	"fmt"
 	"log"
 	"math"
@@ -11,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/hugopukito/golang-fixture/color"
 
 	"github.com/google/uuid"
 )

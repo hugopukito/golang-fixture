@@ -2,11 +2,12 @@ package funcs
 
 import (
 	"errors"
-	"fixture/color"
-	"fixture/database"
 	"fmt"
 	"regexp"
 	"strconv"
+
+	"github.com/hugopukito/golang-fixture/color"
+	"github.com/hugopukito/golang-fixture/database"
 )
 
 var entityNames map[string]struct{}

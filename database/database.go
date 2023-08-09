@@ -2,13 +2,14 @@ package database
 
 import (
 	"database/sql"
-	"fixture/color"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/hugopukito/golang-fixture/color"
 
 	_ "github.com/go-sql-driver/mysql"
 )

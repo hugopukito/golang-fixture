@@ -2,7 +2,6 @@ package funcs
 
 import (
 	"errors"
-	"fixture/color"
 	"fmt"
 	"go/ast"
 	"go/parser"
@@ -14,6 +13,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/hugopukito/golang-fixture/color"
 
 	"github.com/google/uuid"
 )

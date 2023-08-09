@@ -1,4 +1,4 @@
-module fixture
+module github.com/hugopukito/golang-fixture
 
 go 1.19
 

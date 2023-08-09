@@ -32,10 +32,13 @@ func main() {
 }
 ```
 
-Do ```bash 
+Do
+```bash 
 go mod init 'your-project-name'
 ```
-Then ```bash
+
+Then
+```bash
 go get github.com/hugopukito/golang-fixture
 ```
 
@@ -49,6 +52,7 @@ Info:
     text: "some text"
 ```
 
-Then do ```bash 
+Then do 
+```bash 
 go run main.go
 ```

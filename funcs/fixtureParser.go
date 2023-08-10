@@ -19,6 +19,10 @@ func ParseFixture(yamlFixture Fixture, dbName string) {
 		fmt.Println(err)
 		return
 	}
+	yamlFixture, err = createIDs(yamlFixture)
+	if err != nil {
+		fmt.Println(err)
+	}
 	fmt.Print("\n")
 	createEntities(yamlFixture)
 }
@@ -36,6 +40,12 @@ func createTables(yamlFixture Fixture, dbName string) error {
 		}
 	}
 	return nil
+}
+
+func createIDs(yamlFixture Fixture) (Fixture, error) {
+	fmt.Println(color.Purple + "Creating table ref IDs..." + color.Reset)
+
+	return yamlFixture, nil
 }
 
 func createEntities(yamlFixture Fixture) {

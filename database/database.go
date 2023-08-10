@@ -25,8 +25,8 @@ func InitDB(dbName string) {
 		log.Panicln(color.Red + "Failed to connect to sql: " + err.Error() + color.Reset)
 	}
 
-	fmt.Println(color.Pink + "drop database " + color.Yellow + dbName + color.Pink + " if exists..." + color.Reset)
-	fmt.Println(color.Pink + "create database " + color.Yellow + dbName + color.Pink + " if not exists..." + color.Reset)
+	fmt.Println(color.Pink + "Drop database " + color.Yellow + dbName + color.Pink + " if exists..." + color.Reset)
+	fmt.Println(color.Pink + "Create database " + color.Yellow + dbName + color.Pink + " if not exists..." + color.Reset)
 
 	_, filename, _, ok := runtime.Caller(0)
 	if !ok {

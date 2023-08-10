@@ -22,6 +22,7 @@ var currentRegex *regexp.Regexp
 var randCommasRegex *regexp.Regexp
 var randRangeRegex *regexp.Regexp
 var refRegex *regexp.Regexp
+var newRegex *regexp.Regexp
 
 func init() {
 	addFuncsToSpecialTypes()
@@ -42,21 +43,10 @@ func addFuncsToSpecialTypes() {
 
 func compileRegex() {
 	currentRegex, err = regexp.Compile(`\{current\}`)
-	if err != nil {
-		log.Fatalln("Failed to compile regular expression:", err)
-	}
-
 	randCommasRegex, err = regexp.Compile(`\{random\{([^}]*)\}\}`)
-	if err != nil {
-		log.Fatalln("Failed to compile regular expression:", err)
-	}
-
 	randRangeRegex, err = regexp.Compile(`\{random\{((?:\d+(?:\.\d+)?\.\.\d+(?:\.\d+)?))\}\}`)
-	if err != nil {
-		log.Fatalln("Failed to compile regular expression:", err)
-	}
-
 	refRegex, err = regexp.Compile(`{ref{([^}]*)}}`)
+	newRegex, err = regexp.Compile(`\{new\{\}\}`)
 	if err != nil {
 		log.Fatalln("Failed to compile regular expression:", err)
 	}
@@ -67,14 +57,12 @@ func InsertEntity(structName string, entity map[string]any, localStruct map[stri
 	values := make([]any, 0)
 	placeholders := make([]string, 0)
 
-	// Special types auto generated if present in localStruct but not in entity
-	for k, v := range localStruct {
-		if _, exist := entity[k]; !exist {
-			if value, ok := specialTypes[v]; ok {
-				columns = append(columns, k)
-				values = append(values, value.(func() any)())
-				placeholders = append(placeholders, "?")
-			}
+	// Auto generate id if not given in yaml
+	for k := range localStruct {
+		if _, exist := entity[k]; !exist && k == "id" {
+			columns = append(columns, "id")
+			values = append(values, uuid.New().String())
+			placeholders = append(placeholders, "?")
 		}
 	}
 
@@ -116,6 +104,12 @@ func InsertEntity(structName string, entity map[string]any, localStruct map[stri
 				}
 			} else if refMatches := refRegex.FindAllStringSubmatch(value.(string), -1); len(refMatches) > 0 {
 				values = append(values, refMatches[0][1])
+			} else if newRegex.MatchString(value.(string)) {
+				if value, ok := specialTypes[localStruct[column]]; ok {
+					values = append(values, value.(func() any)())
+				} else {
+					fmt.Println(color.Red + "can't generate new for type: " + color.Orange + localStruct[column] + color.Reset)
+				}
 			} else {
 				values = append(values, value)
 			}
@@ -206,7 +200,7 @@ func getRandomElement(strings []string) string {
 		return ""
 	}
 
-	rand.Seed(time.Now().UnixNano())
+	rand := rand.New(rand.NewSource(time.Now().UnixNano()))
 	randomIndex := rand.Intn(len(strings))
 	randomElement := strings[randomIndex]
 
@@ -215,7 +209,7 @@ func getRandomElement(strings []string) string {
 
 func generateRandom(values []string, targetType string) (any, error) {
 	if targetType == "bool" {
-		rand.Seed(time.Now().UnixNano())
+		rand := rand.New(rand.NewSource(time.Now().UnixNano()))
 		return rand.Intn(2) == 1, nil
 	} else if targetType == "int" || targetType == "float64" {
 		return generateRandomNumber(values, targetType)
@@ -228,7 +222,7 @@ func generateRandomNumber(values []string, targetType string) (any, error) {
 	if len(values) != 2 {
 		return nil, errors.New("need 2 values for {random{}}")
 	}
-	rand.Seed(time.Now().UnixNano())
+	rand := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	if targetType == "int" {
 		first, err := strconv.Atoi(values[0])

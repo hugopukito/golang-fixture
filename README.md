@@ -14,9 +14,19 @@ Steps of this package are :
 
 ## Comming soon
 
-- Nested structs
-- Loading bar when using multiply on huge number
-- Primary Key
+- Add multiple files for fixtures
+
+- Permit {current} to be use as struct reference like dog_{current}
+
+- Add * to multiply base on multiple entities the entity (like getting all entities starting with dog*, create entities for each one)
+
+- Do loading bar when lots of entities that take more that 1s to create
+
+- Add primary key
+
+- Add more drivers (now only mysql)
+
+- Tests ahah
 
 ## Example
 
@@ -95,11 +105,7 @@ Specials :
 - `"time.Time"`: "TIMESTAMP",
 - `"uuid.UUID"`: "VARCHAR(36)",
 
-## Yaml 
-
-### Special types
-
-If your column type is in specials and you don't put a value, it will generate one for you, else it will act normally.
+## Yaml
 
 ### Multiply
 
@@ -113,6 +119,18 @@ Cat:
 ```
 
 This will create 10 cats, the '{current}' will take the current number from the loop.
+
+### New
+
+You can use the key '{new{}}' for specials.
+
+```yaml
+dogNewDate:
+  name: "new date dog"
+  created: "{new{}}"
+```
+
+In this example it will generate a new time.
 
 ### Random
 
@@ -144,7 +162,7 @@ Cat:
 
 #### Empty
 
-For bool
+For bool and specials (time and uuid)
 
 ```yaml
 Cat:
@@ -156,4 +174,24 @@ Cat:
 
 ### Nested
 
-Comming soon ...
+You can make reference to another entity if you have a table referencing another one.
+
+Just use the key '{ref{entityKey}}' with the entity key.
+
+```yaml
+Cat:
+  cat_nested:
+    name: "nested"
+    info: "{ref{myInfo}}"
+    more: "{ref{more1}}"
+
+Info:
+  myInfo:
+    text: "some text"
+
+More:
+  more1:
+    moreText: "more text"
+```
+
+It will then add '_id' to the column like 'info_id' and 'more_id' for the table cat.

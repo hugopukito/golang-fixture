@@ -24,6 +24,8 @@ var structOrdered = make(map[string][]string)
 var specialTypes = make(map[string]func(any) bool)
 var randomRegex *regexp.Regexp
 var refRegex *regexp.Regexp
+var newRegex *regexp.Regexp
+var err error
 
 func init() {
 	addFuncsToSpecialTypes()
@@ -31,13 +33,9 @@ func init() {
 }
 
 func compileRegex() {
-	var err error
 	randomRegex, err = regexp.Compile(`\{random\{([^}]*)\}\}`)
-	if err != nil {
-		log.Fatalln("Failed to compile regular expression:", err)
-	}
-
 	refRegex, err = regexp.Compile(`{ref{([^}]*)}}`)
+	newRegex, err = regexp.Compile(`\{new\{\}\}`)
 	if err != nil {
 		log.Fatalln("Failed to compile regular expression:", err)
 	}
@@ -104,7 +102,7 @@ func CheckEntityOfStructIsValid(structName string, entity map[string]any, entity
 				if _, isString := value.(string); !isString {
 					fmt.Println(color.Red+"local type: "+color.Orange+localType+color.Red+" doesn't match with entity type: "+color.Orange+fixtureType+color.Red+" on field: "+color.Orange+field+color.Red+" and unknown type value for entity ->", entityName+color.Reset)
 				} else {
-					if randomRegex.MatchString(value.(string)) || refRegex.MatchString(value.(string)) {
+					if randomRegex.MatchString(value.(string)) || refRegex.MatchString(value.(string)) || newRegex.MatchString(value.(string)) {
 						return true
 					} else {
 						fmt.Println(color.Red+"local type: "+color.Orange+localType+color.Red+" doesn't match with entity type: "+color.Orange+fixtureType+color.Red+" on field and value: "+color.Orange+field+": "+value.(string)+color.Red+" for entity ->", entityName+color.Reset)

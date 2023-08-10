@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/hugopukito/golang-fixture/color"
@@ -20,7 +21,7 @@ func ParseFixture(yamlFixture Fixture, dbName string) {
 		fmt.Println(err)
 		return
 	}
-	yamlFixture, err = createIDs(yamlFixture)
+	yamlFixture, err = createTableRefIDs(yamlFixture)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -43,29 +44,34 @@ func createTables(yamlFixture Fixture, dbName string) error {
 	return nil
 }
 
-func createIDs(yamlFixture Fixture) (Fixture, error) {
+func createTableRefIDs(yamlFixture Fixture) (Fixture, error) {
 	fmt.Println(color.Purple + "Creating table ref IDs..." + color.Reset)
 
-	refEntities := make([]string, 0)
+	refEntities := make(map[string]string, 0)
 
 	for _, structValue := range yamlFixture.Entities {
 		for _, v := range structValue {
-			for _, v2 := range v {
-				if refMatches := refRegex.FindAllStringSubmatch(v2.(string), -1); len(refMatches) > 0 {
-					refEntities = append(refEntities, refMatches[0][1])
+			for k2, v2 := range v {
+				if _, isString := v2.(string); isString {
+					if refMatches := refRegex.FindAllStringSubmatch(v2.(string), -1); len(refMatches) > 0 {
+						refMatch := refMatches[0][1]
+						uuid := uuid.New().String()
+						v[k2] = strings.Replace(v2.(string), refMatch, uuid, -1)
+						refEntities[refMatch] = uuid
+					}
 				}
 			}
 		}
 	}
 
-	for _, ref := range refEntities {
+	for ref, uuid := range refEntities {
 		refFound := false
 		for structName, structValue := range yamlFixture.Entities {
 			if v, ok := structValue[ref]; ok {
 				refFound = true
 				if localStruct, exist := GetLocalStructByName(structName); exist {
 					if localStruct["id"] == "uuid.UUID" {
-						v["id"] = uuid.New()
+						v["id"] = uuid
 					} else {
 						return Fixture{}, errors.New(color.Red + "This ref don't have id field: " + color.Orange + ref + color.Reset)
 					}
@@ -104,7 +110,7 @@ func createEntities(yamlFixture Fixture) {
 
 					for i := startNumber; i < nbOfCreation+startNumber; i++ {
 						var entityNameNumberized string
-						if nbOfCreation == 1 && startNumber != 0 {
+						if nbOfCreation == 1 && startNumber == 0 {
 							entityNameNumberized = entityName
 						} else {
 							entityNameNumberized = entityName + strconv.Itoa(i)

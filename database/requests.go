@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/hugopukito/golang-fixture/color"
 
@@ -17,7 +18,6 @@ import (
 )
 
 var specialTypes = make(map[string]any)
-var primaryColumns = []string{"id", "uid", "uuid"}
 var currentRegex *regexp.Regexp
 var randCommasRegex *regexp.Regexp
 var randRangeRegex *regexp.Regexp
@@ -80,8 +80,16 @@ func InsertEntity(structName string, entity map[string]any, localStruct map[stri
 
 	// Fields from entity
 	for column, value := range entity {
-		columns = append(columns, column)
 		_, isString := value.(string)
+
+		if isString {
+			refMatches := refRegex.FindAllStringSubmatch(value.(string), -1)
+			if len(refMatches) > 0 {
+				column += "_id"
+			}
+		}
+		columns = append(columns, camelToSnake(column))
+
 		if isString {
 			if currentRegex.MatchString(value.(string)) {
 				values = append(values, strings.ReplaceAll(value.(string), "{current}", strconv.Itoa(occurrence)))
@@ -107,7 +115,7 @@ func InsertEntity(structName string, entity map[string]any, localStruct map[stri
 					values = append(values, randomVal)
 				}
 			} else if refMatches := refRegex.FindAllStringSubmatch(value.(string), -1); len(refMatches) > 0 {
-				fmt.Println("need to ref to the id by finding in the yaml the entity by entityName", value)
+				values = append(values, refMatches[0][1])
 			} else {
 				values = append(values, value)
 			}
@@ -154,7 +162,7 @@ func CreateTable(tableName string, localStructs map[string]map[string]string, lo
 				for structTypekey := range structType {
 					structTypeKeys = append(structTypeKeys, structTypekey)
 				}
-				if primaryColumn := doesContainsPrimaryColumn(structTypeKeys); primaryColumn != "" {
+				if primaryColumn := getIfExistPrimaryColumn(structTypeKeys); primaryColumn != "" {
 					if structFieldType, ok := GoSQLTypeMap[structType[primaryColumn]]; ok {
 						columns = append(columns, fmt.Sprintf("%s %s", columnName+"_id", structFieldType))
 						continue
@@ -162,13 +170,13 @@ func CreateTable(tableName string, localStructs map[string]map[string]string, lo
 						return errors.New(color.Red + "sql type for type: " + color.Orange + columnType + color.Red + " doesn't exist")
 					}
 				} else {
-					return errors.New(color.Red + "no primary key in " + "[" + strings.Join(primaryColumns, ", ") + "]" + " for struct: " + color.Orange + columnName)
+					return errors.New(color.Red + "no primary key: id" + " for struct: " + color.Orange + columnName)
 				}
 			} else {
 				return errors.New(color.Red + "sql type for type: " + color.Orange + columnType + color.Red + " doesn't exist")
 			}
 		}
-		columns = append(columns, fmt.Sprintf("%s %s", columnName, sqlType))
+		columns = append(columns, fmt.Sprintf("%s %s", camelToSnake(columnName), sqlType))
 	}
 
 	query := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (%s)", tableName, strings.Join(columns, ", "))
@@ -247,13 +255,26 @@ func generateRandomNumber(values []string, targetType string) (any, error) {
 	return nil, errors.New("problem with your random{x..y}")
 }
 
-func doesContainsPrimaryColumn(slice []string) string {
+func getIfExistPrimaryColumn(slice []string) string {
 	for _, v1 := range slice {
-		for _, v2 := range primaryColumns {
-			if v1 == v2 {
-				return v1
-			}
+		if v1 == "id" {
+			return v1
 		}
 	}
 	return ""
+}
+
+func camelToSnake(camel string) string {
+	var result []rune
+	for i, r := range camel {
+		if unicode.IsUpper(r) {
+			if i > 0 {
+				result = append(result, '_')
+			}
+			result = append(result, unicode.ToLower(r))
+		} else {
+			result = append(result, r)
+		}
+	}
+	return string(result)
 }

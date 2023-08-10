@@ -2,9 +2,7 @@
 
 ## Features
 
-- Implement nested structs
-  -> Need to solve problem of adding 0 to entityName after single entities in yaml
-  -> give id (if not specified, than will be write in sql) for each struct than needs id before starting inserting entities
+- Add multiple files for fixtures
 
 - Permit {current} to be use as struct reference like dog_{current}
 
@@ -16,4 +14,6 @@
 
 - Add primary key
 
-- Add multiple files for fixtures
+- Add more drivers (now only mysql)
+
+- Tests ahah

@@ -6,22 +6,24 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/hugopukito/golang-fixture/color"
 	"gopkg.in/yaml.v3"
 )
 
-func GetYamlStructs(pkgName string) ([]Fixture, error) {
+func GetYamlStructs(pkgName string) (Fixture, error) {
 	wd, err := os.Getwd()
 	if err != nil {
-		return nil, errors.New("Error getting current working directory: " + err.Error())
+		return Fixture{}, errors.New("Error getting current working directory: " + err.Error())
 	}
 	structDir := wd + "/" + pkgName
 
 	files, err := os.ReadDir(structDir)
 	if err != nil {
-		return nil, errors.New("Error reading directory: " + err.Error())
+		return Fixture{}, errors.New("Error reading directory: " + err.Error())
 	}
 
-	var yamlFixtures []Fixture
+	var yamlFixtures Fixture
+	yamlFixtures.Entities = make(map[string]Entity)
 
 	for _, file := range files {
 		if file.IsDir() {
@@ -34,12 +36,12 @@ func GetYamlStructs(pkgName string) ([]Fixture, error) {
 
 		yamlFile, err := os.ReadFile(filePath)
 		if err != nil {
-			return nil, err
+			return Fixture{}, err
 		}
 
 		err = yaml.Unmarshal(yamlFile, &yamlFixture)
 		if err != nil {
-			return nil, err
+			return Fixture{}, err
 		}
 
 		newMap := make(map[string]Entity, len(yamlFixture.Entities))
@@ -50,7 +52,21 @@ func GetYamlStructs(pkgName string) ([]Fixture, error) {
 		}
 		yamlFixture.Entities = newMap
 
-		yamlFixtures = append(yamlFixtures, yamlFixture)
+		for entityKey, entity := range yamlFixture.Entities {
+			if oldEntity, exists := yamlFixtures.Entities[entityKey]; exists {
+				for k, v := range entity {
+					// check if entity key exist
+					if _, entityExist := oldEntity[k]; !entityExist {
+						oldEntity[k] = v
+					} else {
+						return Fixture{}, errors.New("Error two entities same name key: " + color.Orange + k)
+					}
+				}
+				yamlFixtures.Entities[entityKey] = oldEntity
+			} else {
+				yamlFixtures.Entities[entityKey] = entity
+			}
+		}
 	}
 
 	return yamlFixtures, nil

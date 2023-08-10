@@ -34,7 +34,5 @@ func RunFixtures(databaseName, fixtureDirName string) {
 	}
 
 	fmt.Println(color.Purple + "Parsing your fixtures... \n" + color.Reset)
-	for _, yamlFixture := range yamlFixtures {
-		funcs.ParseFixture(yamlFixture, databaseName)
-	}
+	funcs.ParseFixture(yamlFixtures, databaseName)
 }

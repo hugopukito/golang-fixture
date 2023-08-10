@@ -1,11 +1,13 @@
 package funcs
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/hugopukito/golang-fixture/color"
@@ -108,26 +110,48 @@ func createEntities(yamlFixture Fixture) {
 						fmt.Println(color.Cyan+"Adding entity ->", color.Yellow, entityName+"..."+color.Reset)
 					}
 
-					for i := startNumber; i < nbOfCreation+startNumber; i++ {
-						var entityNameNumberized string
-						if nbOfCreation == 1 && startNumber == 0 {
-							entityNameNumberized = entityName
-						} else {
-							entityNameNumberized = entityName + strconv.Itoa(i)
-						}
-						if !addAndCheckEntityName(entityNameNumberized) {
-							fmt.Println(color.Red + "entity name already taken: " + color.Orange + entityNameNumberized + color.Reset)
-						}
-						err := database.InsertEntity(structName, fieldsAndValues, localStruct, i)
-						if err != nil {
-							fmt.Println(color.Red+"failed creating entity: "+color.Orange+entityNameNumberized, color.Red+err.Error()+color.Reset)
-						}
+					ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+					defer cancel()
+
+					err = entitiesFactory(ctx, startNumber, nbOfCreation, structName, entityName, fieldsAndValues, localStruct)
+					if err != nil {
+						fmt.Println(err)
 					}
 				}
 			}
 		}
 		fmt.Print("\n")
 	}
+}
+
+func entitiesFactory(ctx context.Context, startNumber, nbOfCreation int, structName, entityName string, fieldsAndValues map[string]any, localStruct map[string]string) error {
+	for i := startNumber; i < nbOfCreation+startNumber; i++ {
+
+		select {
+		case <-ctx.Done():
+			percentage := (i - startNumber + 1) * 100 / nbOfCreation
+			fmt.Printf("\r%d%%", percentage)
+			if i == nbOfCreation+startNumber-1 {
+				fmt.Printf("\r\033[K")
+			}
+		default:
+		}
+
+		var entityNameNumberized string
+		if nbOfCreation == 1 && startNumber == 0 {
+			entityNameNumberized = entityName
+		} else {
+			entityNameNumberized = entityName + strconv.Itoa(i)
+		}
+		if !addAndCheckEntityName(entityNameNumberized) {
+			return errors.New(color.Red + "entity name already taken: " + color.Orange + entityNameNumberized + color.Reset)
+		}
+		err := database.InsertEntity(structName, fieldsAndValues, localStruct, i)
+		if err != nil {
+			return errors.New(color.Red + "failed creating entity: " + color.Orange + entityNameNumberized + color.Red + err.Error() + color.Reset)
+		}
+	}
+	return nil
 }
 
 func ensureTableIsCreated(structName string, localStructOrdered []string, dbName string) error {

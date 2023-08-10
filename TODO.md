@@ -8,8 +8,6 @@
 
 ### Later if necessary
 
-- Do loading bar when lots of entities that take more that 1s to create
-
 - Add primary key
 
 - Add more drivers (now only mysql)

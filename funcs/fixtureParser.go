@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/hugopukito/golang-fixture/color"
 	"github.com/hugopukito/golang-fixture/database"
 )
@@ -44,6 +45,37 @@ func createTables(yamlFixture Fixture, dbName string) error {
 
 func createIDs(yamlFixture Fixture) (Fixture, error) {
 	fmt.Println(color.Purple + "Creating table ref IDs..." + color.Reset)
+
+	refEntities := make([]string, 0)
+
+	for _, structValue := range yamlFixture.Entities {
+		for _, v := range structValue {
+			for _, v2 := range v {
+				if refMatches := refRegex.FindAllStringSubmatch(v2.(string), -1); len(refMatches) > 0 {
+					refEntities = append(refEntities, refMatches[0][1])
+				}
+			}
+		}
+	}
+
+	for _, ref := range refEntities {
+		refFound := false
+		for structName, structValue := range yamlFixture.Entities {
+			if v, ok := structValue[ref]; ok {
+				refFound = true
+				if localStruct, exist := GetLocalStructByName(structName); exist {
+					if localStruct["id"] == "uuid.UUID" {
+						v["id"] = uuid.New()
+					} else {
+						return Fixture{}, errors.New(color.Red + "This ref don't have id field: " + color.Orange + ref + color.Reset)
+					}
+				}
+			}
+		}
+		if !refFound {
+			return Fixture{}, errors.New(color.Red + "Ref not found: " + color.Orange + ref + color.Reset)
+		}
+	}
 
 	return yamlFixture, nil
 }

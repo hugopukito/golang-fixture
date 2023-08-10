@@ -15,3 +15,5 @@
 - Do loading bar when lots of entities that take more that 1s to create
 
 - Add primary key
+
+- Add multiple files for fixtures

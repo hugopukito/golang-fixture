@@ -16,13 +16,26 @@ import (
 //
 // Parameters:
 //
-// - databaseName: Choose the database name that will be used ⚠️ or deleted if exist
+//   - fixtureDirName: Give the location of your yaml files that describes entities
 //
-// - fixtureDirName: Give the location of your yaml files that describes entities
-func RunFixtures(databaseName, fixtureDirName string) {
+//   - databaseParams: Choose the database name (that will be used ⚠️ or deleted if exist), user, password, ip, port
+//
+//     Default values:
+//
+//   - dbName: fixture
+//
+//   - user: root
+//
+//   - password: password
+//
+//   - ip: localhost
+//
+//   - port: 3306
+func RunFixtures(fixtureDirName string, databaseParams database.DatabaseParams) {
 
 	fmt.Println(color.Pink + "Testing connection to your sql..." + color.Reset)
-	database.InitDB(databaseName)
+	database.InitDB(&databaseParams)
+	fmt.Println(databaseParams)
 
 	fmt.Println(color.Blue + "\nParsing your local structs..." + color.Reset)
 	funcs.InitLocalStructs()
@@ -34,5 +47,5 @@ func RunFixtures(databaseName, fixtureDirName string) {
 	}
 
 	fmt.Println(color.Purple + "Parsing your fixtures... \n" + color.Reset)
-	funcs.ParseFixture(yamlFixtures, databaseName)
+	funcs.ParseFixture(yamlFixtures, databaseParams.Name)
 }

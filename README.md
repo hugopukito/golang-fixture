@@ -33,21 +33,22 @@ package main
 
 import (
 	fixture "github.com/hugopukito/golang-fixture"
+	"github.com/hugopukito/golang-fixture/database"
 )
 
 type Info struct {
-	Text string
+  Text string
 }
 
 func main() {
-	fixture.RunFixtures("db-fixture-test", "my-fixtures")
+	fixture.RunFixtures("my-fixtures", database.DatabaseParams{})
 }
 ```
 
 The 'RunFixtures' func takes two parameters:
 
-- databaseName: Choose the database name that will be used ⚠️ or deleted if exist.
 - fixtureDirName: Give the location of your yaml files that describes entities.
+- databaseParams: Choose the database name (that will be used ⚠️ or deleted if exist), user, password, ip, port.
 
 
 Do

@@ -18,15 +18,41 @@ import (
 var sqlConn *sql.DB
 var err error
 
-func InitDB(dbName string) {
+type DatabaseParams struct {
+	Name     string
+	User     string
+	Password string
+	Ip       string
+	Port     string
+}
 
-	sqlConn, err = sql.Open("mysql", "root:password@tcp(localhost:3306)/")
+func InitDB(databaseParams *DatabaseParams) {
+
+	if databaseParams.Name == "" {
+		databaseParams.Name = "fixture"
+	}
+	if databaseParams.User == "" {
+		databaseParams.User = "root"
+	}
+	if databaseParams.Password == "" {
+		databaseParams.Password = "password"
+	}
+	if databaseParams.Ip == "" {
+		databaseParams.Ip = "localhost"
+	}
+	if databaseParams.Port == "" {
+		databaseParams.Port = "3306"
+	}
+
+	dataSource := databaseParams.User + ":" + databaseParams.Password + "@tcp(" + databaseParams.Ip + ":" + databaseParams.Port + ")/"
+
+	sqlConn, err = sql.Open("mysql", dataSource)
 	if err != nil {
 		log.Panicln(color.Red + "Failed to connect to sql: " + err.Error() + color.Reset)
 	}
 
-	fmt.Println(color.Pink + "Drop database " + color.Yellow + dbName + color.Pink + " if exists..." + color.Reset)
-	fmt.Println(color.Pink + "Create database " + color.Yellow + dbName + color.Pink + " if not exists..." + color.Reset)
+	fmt.Println(color.Pink + "Drop database " + color.Yellow + databaseParams.Name + color.Pink + " if exists..." + color.Reset)
+	fmt.Println(color.Pink + "Create database " + color.Yellow + databaseParams.Name + color.Pink + " if not exists..." + color.Reset)
 
 	_, filename, _, ok := runtime.Caller(0)
 	if !ok {
@@ -51,7 +77,7 @@ func InitDB(dbName string) {
 	data := struct {
 		DatabaseName string
 	}{
-		DatabaseName: dbName,
+		DatabaseName: databaseParams.Name,
 	}
 
 	var output strings.Builder
@@ -74,7 +100,7 @@ func InitDB(dbName string) {
 		}
 	}
 
-	sqlConn, err = sql.Open("mysql", "root:password@tcp(localhost:3306)/"+dbName)
+	sqlConn, err = sql.Open("mysql", dataSource+databaseParams.Name)
 	if err != nil {
 		log.Panicln(color.Red + "Failed to connect to sql: " + err.Error() + color.Reset)
 	}

@@ -12,6 +12,8 @@ Steps of this package are :
 - Verify that all the fields for your yaml entities match with local structs defined in your project.
 - Insert all the entities you described in yaml files
 
+Working with mysql driver only (for the moment).
+
 ## Comming soon
 
 - Permit {current} to be use as struct reference like dog_{current}

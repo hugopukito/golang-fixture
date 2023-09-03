@@ -51,6 +51,7 @@ The 'RunFixtures' func takes two parameters:
 
 - fixtureDirName: Give the location of your yaml files that describes entities.
 - databaseParams: Choose the database name (that will be used ⚠️ or deleted if exist), user, password, ip, port.
+- default values: dbName: 'fixture', user: 'root', password: '', ip: 'localhost', port: 3306
 
 
 Do

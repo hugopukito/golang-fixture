@@ -22,20 +22,19 @@ import (
 //
 //     Default values:
 //
-//   - dbName: fixture
+//   - dbName: 'fixture'
 //
-//   - user: root
+//   - user: 'root'
 //
-//   - password: password
+//   - password: ""
 //
-//   - ip: localhost
+//   - ip: 'localhost'
 //
 //   - port: 3306
 func RunFixtures(fixtureDirName string, databaseParams database.DatabaseParams) {
 
 	fmt.Println(color.Pink + "Testing connection to your sql..." + color.Reset)
 	database.InitDB(&databaseParams)
-	fmt.Println(databaseParams)
 
 	fmt.Println(color.Blue + "\nParsing your local structs..." + color.Reset)
 	funcs.InitLocalStructs()

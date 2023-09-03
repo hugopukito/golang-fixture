@@ -34,9 +34,6 @@ func InitDB(databaseParams *DatabaseParams) {
 	if databaseParams.User == "" {
 		databaseParams.User = "root"
 	}
-	if databaseParams.Password == "" {
-		databaseParams.Password = "password"
-	}
 	if databaseParams.Ip == "" {
 		databaseParams.Ip = "localhost"
 	}

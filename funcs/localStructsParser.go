@@ -25,6 +25,7 @@ var specialTypes = make(map[string]func(any) bool)
 var randomRegex *regexp.Regexp
 var refRegex *regexp.Regexp
 var newRegex *regexp.Regexp
+var hashRegex *regexp.Regexp
 var err error
 
 func init() {
@@ -36,6 +37,7 @@ func compileRegex() {
 	randomRegex, err = regexp.Compile(`\{random\{([^}]*)\}\}`)
 	refRegex, err = regexp.Compile(`{ref{([^}]*)}}`)
 	newRegex, err = regexp.Compile(`\{new\{\}\}`)
+	hashRegex, err = regexp.Compile(`\{hash\{[^}]*\}\}`)
 	if err != nil {
 		log.Fatalln("Failed to compile regular expression:", err)
 	}
@@ -102,7 +104,7 @@ func CheckEntityOfStructIsValid(structName string, entity map[string]any, entity
 				if _, isString := value.(string); !isString {
 					fmt.Println(color.Red+"local type: "+color.Orange+localType+color.Red+" doesn't match with entity type: "+color.Orange+fixtureType+color.Red+" on field: "+color.Orange+field+color.Red+" and unknown type value for entity ->", entityName+color.Reset)
 				} else {
-					if randomRegex.MatchString(value.(string)) || refRegex.MatchString(value.(string)) || newRegex.MatchString(value.(string)) {
+					if matchesAnyRegex(value.(string), randomRegex, refRegex, newRegex, hashRegex) {
 						return true
 					} else {
 						fmt.Println(color.Red+"local type: "+color.Orange+localType+color.Red+" doesn't match with entity type: "+color.Orange+fixtureType+color.Red+" on field and value: "+color.Orange+field+": "+value.(string)+color.Red+" for entity ->", entityName+color.Reset)
@@ -209,4 +211,13 @@ func getFullSelectorExpr(expr *ast.SelectorExpr) string {
 	identName = expr.Sel.Name
 
 	return pkgName + "." + identName
+}
+
+func matchesAnyRegex(str string, regexes ...*regexp.Regexp) bool {
+	for _, regex := range regexes {
+		if regex.MatchString(str) {
+			return true
+		}
+	}
+	return false
 }

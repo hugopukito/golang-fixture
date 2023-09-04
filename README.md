@@ -195,3 +195,21 @@ More:
 ```
 
 It will then add '_id' to the column like 'info_id' and 'more_id' for the table cat.
+
+### Hash
+
+You can hash your passwords (or any string) that uses bcrypt.GenerateFromPassword with a salt of 14.
+
+Just use the key '{hash{password}}'.
+
+```yaml
+User:
+  user1:
+    email: "test@fixture.com"
+    password: "{hash{password}}"
+  user2:
+    email: "test2@fixture.com"
+    password: "not_hashed_password"
+```
+
+The user1 will result of an hashed password, you can put whatever you want after the {hash{}} keyword.

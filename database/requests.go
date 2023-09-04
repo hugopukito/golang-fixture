@@ -13,6 +13,7 @@ import (
 	"unicode"
 
 	"github.com/hugopukito/golang-fixture/color"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/google/uuid"
 )
@@ -23,6 +24,7 @@ var randCommasRegex *regexp.Regexp
 var randRangeRegex *regexp.Regexp
 var refRegex *regexp.Regexp
 var newRegex *regexp.Regexp
+var hashRegex *regexp.Regexp
 
 func init() {
 	addFuncsToSpecialTypes()
@@ -47,6 +49,7 @@ func compileRegex() {
 	randRangeRegex, err = regexp.Compile(`\{random\{((?:\d+(?:\.\d+)?\.\.\d+(?:\.\d+)?))\}\}`)
 	refRegex, err = regexp.Compile(`{ref{([^}]*)}}`)
 	newRegex, err = regexp.Compile(`\{new\{\}\}`)
+	hashRegex, err = regexp.Compile(`\{hash\{[^}]*\}\}`)
 	if err != nil {
 		log.Fatalln("Failed to compile regular expression:", err)
 	}
@@ -110,6 +113,12 @@ func InsertEntity(structName string, entity map[string]any, localStruct map[stri
 				} else {
 					fmt.Println(color.Red + "can't generate new for type: " + color.Orange + localStruct[column] + color.Reset)
 				}
+			} else if hashRegex.MatchString(value.(string)) {
+				hashPwd, err := generateHashPassword(value.(string))
+				if err != nil {
+					return err
+				}
+				values = append(values, hashPwd)
 			} else {
 				values = append(values, value)
 			}
@@ -271,4 +280,9 @@ func camelToSnake(camel string) string {
 		}
 	}
 	return string(result)
+}
+
+func generateHashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
 }

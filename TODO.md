@@ -1,5 +1,11 @@
 # TODO
 
+## Bug
+
+When adding new field in entity with nested fields, doesn't work first time but working other times.
+
+See benji project offer
+
 ## Important
 
 - system that don't run fixture every go run main.go

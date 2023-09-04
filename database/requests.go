@@ -49,7 +49,7 @@ func compileRegex() {
 	randRangeRegex, err = regexp.Compile(`\{random\{((?:\d+(?:\.\d+)?\.\.\d+(?:\.\d+)?))\}\}`)
 	refRegex, err = regexp.Compile(`{ref{([^}]*)}}`)
 	newRegex, err = regexp.Compile(`\{new\{\}\}`)
-	hashRegex, err = regexp.Compile(`\{hash\{[^}]*\}\}`)
+	hashRegex, err = regexp.Compile(`{hash{([^}]*)}}`)
 	if err != nil {
 		log.Fatalln("Failed to compile regular expression:", err)
 	}

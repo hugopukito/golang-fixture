@@ -113,8 +113,8 @@ func InsertEntity(structName string, entity map[string]any, localStruct map[stri
 				} else {
 					fmt.Println(color.Red + "can't generate new for type: " + color.Orange + localStruct[column] + color.Reset)
 				}
-			} else if hashRegex.MatchString(value.(string)) {
-				hashPwd, err := generateHashPassword(value.(string))
+			} else if hashMatches := hashRegex.FindAllStringSubmatch(value.(string), -1); len(hashMatches) > 0 {
+				hashPwd, err := generateHashPassword(hashMatches[0][1])
 				if err != nil {
 					return err
 				}

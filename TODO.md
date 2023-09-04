@@ -2,6 +2,7 @@
 
 ## Important
 
+- password need to be hashed, maybe param or {} syntax
 - system that don't run fixture every go run main.go
 
 ## Features

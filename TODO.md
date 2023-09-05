@@ -2,8 +2,11 @@
 
 ## Bug
 
-When adding new field in entity with nested fields, doesn't work first time but working other times.
+Problem, can't user Employer User but only User User works
+User type and Employer name of field
 
+When adding new field in entity with nested fields, doesn't work first time but working other times.
+ -> Probably because was using CompanyId instead of Company
 See benji project offer
 
 ## Important

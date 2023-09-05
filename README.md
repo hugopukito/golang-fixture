@@ -26,6 +26,10 @@ Working with mysql driver only (for the moment).
 
 - Tests ahah
 
+## Modification Check
+
+modTimeFixture file will be created so it will run fixtures only when you add, modify or delete files inside your fixture folder.
+
 ## Example
 
 Create a main.go file

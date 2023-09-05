@@ -5,11 +5,6 @@
 When adding new field in entity with nested fields, doesn't work first time but working other times.
  -> Probably because was using CompanyId with uuid.UUID type instead of Company with Company type
  -> Didn't got it since a while
- 
-
-## Important
-
-- system that don't run fixture every go run main.go
 
 ## Features
 

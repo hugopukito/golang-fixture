@@ -19,6 +19,12 @@ import (
 	"github.com/google/uuid"
 )
 
+type Fixture struct {
+	Entities map[string]Entity `yaml:",inline"`
+}
+
+type Entity map[string]map[string]any
+
 var structMap = make(map[string]map[string]string)
 var structOrdered = make(map[string][]string)
 var specialTypes = make(map[string]func(any) bool)

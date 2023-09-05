@@ -10,12 +10,12 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func GetYamlStructs(pkgName string) (Fixture, error) {
+func GetYamlStructs(fixtureDirName string) (Fixture, error) {
 	wd, err := os.Getwd()
 	if err != nil {
 		return Fixture{}, errors.New("Error getting current working directory: " + err.Error())
 	}
-	structDir := wd + "/" + pkgName
+	structDir := wd + "/" + fixtureDirName
 
 	files, err := os.ReadDir(structDir)
 	if err != nil {
@@ -26,7 +26,7 @@ func GetYamlStructs(pkgName string) (Fixture, error) {
 	yamlFixtures.Entities = make(map[string]Entity)
 
 	for _, file := range files {
-		if file.IsDir() {
+		if file.IsDir() || !isYAMLFile(file.Name()) {
 			continue
 		}
 

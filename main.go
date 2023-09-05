@@ -33,6 +33,15 @@ import (
 //   - port: 3306
 func RunFixtures(fixtureDirName string, databaseParams database.DatabaseParams) {
 
+	modified, err := funcs.CheckIfFixturesGotModified(fixtureDirName)
+	if err != nil {
+		fmt.Println(color.Red + "Check if fixture got modified err: " + err.Error() + color.Reset)
+		return
+	}
+	if !modified {
+		return
+	}
+
 	fmt.Println(color.Pink + "Testing connection to your sql..." + color.Reset)
 	database.InitDB(&databaseParams)
 

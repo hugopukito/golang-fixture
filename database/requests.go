@@ -154,12 +154,14 @@ func CreateTable(tableName string, localStructs map[string]map[string]string, lo
 	fmt.Println(color.Purple+"Creating table ->", color.Yellow, tableName+"..."+color.Reset)
 	columns := make([]string, 0, len(localStructs[tableName]))
 
+	//fmt.Println(localStructs)
+
 	for _, columnName := range localStructOrdered {
 		columnType := localStructs[tableName][columnName]
 
 		sqlType, exist := GoSQLTypeMap[columnType]
 		if !exist {
-			structType, structTypeExist := localStructs[columnName]
+			structType, structTypeExist := localStructs[strings.ToLower(columnType)]
 			if structTypeExist {
 				structTypeKeys := make([]string, 0, len(structType))
 				for structTypekey := range structType {

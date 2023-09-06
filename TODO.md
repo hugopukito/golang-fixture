@@ -1,5 +1,9 @@
 # TODO
 
+## Cool
+
+Permit to have a text type column instead of varchar(255) to generate bigger strings
+
 ## Bug
 
 When adding new field in entity with nested fields, doesn't work first time but working other times.

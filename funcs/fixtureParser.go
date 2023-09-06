@@ -51,21 +51,30 @@ func createTableRefIDs(yamlFixture Fixture) (Fixture, error) {
 
 	refEntities := make(map[string]string, 0)
 
+	// Will create a map of entities which have entities calling them with ref
+	// Then give each ref an uuid
 	for _, structValue := range yamlFixture.Entities {
 		for _, v := range structValue {
 			for k2, v2 := range v {
 				if _, isString := v2.(string); isString {
 					if refMatches := refRegex.FindAllStringSubmatch(v2.(string), -1); len(refMatches) > 0 {
 						refMatch := refMatches[0][1]
-						uuid := uuid.New().String()
-						v[k2] = strings.Replace(v2.(string), refMatch, uuid, -1)
-						refEntities[refMatch] = uuid
+
+						// Assign to the parent of ref the uuid to inject it later because we don't know if it exist yet
+						// Check if we already create an uuid for this ref, if not create one
+						if _, ok := refEntities[refMatch]; !ok {
+							refEntities[refMatch] = uuid.New().String()
+						}
+
+						// Assign to the entities calling ref the uuid
+						v[k2] = strings.Replace(v2.(string), refMatch, refEntities[refMatch], -1)
 					}
 				}
 			}
 		}
 	}
 
+	// Take the uuid given and inject it in the parent of ref
 	for ref, uuid := range refEntities {
 		refFound := false
 		for structName, structValue := range yamlFixture.Entities {

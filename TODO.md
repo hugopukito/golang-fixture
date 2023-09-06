@@ -1,16 +1,16 @@
 # TODO
 
+## Old Bug
+
+When adding new field in entity with nested fields, doesn't work first time but working other times.
+ -> Probably because was using CompanyId with uuid.UUID type instead of Company with Company type
+ -> Didn't got it since a while
+
 ## Cool
 
 Permit to have a text type column instead of varchar(255) to generate bigger strings
 
 change seed on same entity
-
-## Bug
-
-When adding new field in entity with nested fields, doesn't work first time but working other times.
- -> Probably because was using CompanyId with uuid.UUID type instead of Company with Company type
- -> Didn't got it since a while
 
 ## Features
 

@@ -244,7 +244,7 @@ func generateRandomWords(textLength string) (string, error) {
 		return "", err
 	}
 
-	if length > 35 {
+	if length > 33 {
 		return "", errors.New("too long length for {random{word{}}} can't be over 35")
 	}
 

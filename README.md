@@ -142,7 +142,7 @@ You can use random in three ways.
 
 #### Word
 
-You can generate random words like lorem ipsum with a limit of 35 words string
+You can generate random words like lorem ipsum with a limit of 33 words string
 
 ```yaml
 Cat:

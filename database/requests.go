@@ -20,6 +20,7 @@ import (
 
 var specialTypes = make(map[string]any)
 var currentRegex *regexp.Regexp
+var randWordRegex *regexp.Regexp
 var randCommasRegex *regexp.Regexp
 var randRangeRegex *regexp.Regexp
 var refRegex *regexp.Regexp
@@ -45,6 +46,7 @@ func addFuncsToSpecialTypes() {
 
 func compileRegex() {
 	currentRegex, err = regexp.Compile(`\{current\}`)
+	randWordRegex, err = regexp.Compile(`^{random{word{(\d+)}}}$`)
 	randCommasRegex, err = regexp.Compile(`\{random\{([^}]*)\}\}`)
 	randRangeRegex, err = regexp.Compile(`\{random\{((?:\d+(?:\.\d+)?\.\.\d+(?:\.\d+)?))\}\}`)
 	refRegex, err = regexp.Compile(`{ref{([^}]*)}}`)
@@ -84,6 +86,13 @@ func InsertEntity(structName string, entity map[string]any, localStruct map[stri
 		if isString {
 			if currentRegex.MatchString(value.(string)) {
 				values = append(values, strings.ReplaceAll(value.(string), "{current}", strconv.Itoa(occurrence)))
+			} else if randWordMatches := randWordRegex.FindAllStringSubmatch(value.(string), -1); len(randWordMatches) > 0 {
+				innerContent := randWordMatches[0][1]
+				value, err := generateRandomWords(innerContent)
+				if err != nil {
+					return err
+				}
+				values = append(values, value)
 			} else if randCommasMatches := randCommasRegex.FindAllStringSubmatch(value.(string), -1); len(randCommasMatches) > 0 {
 				if randRangeMatches := randRangeRegex.FindAllStringSubmatch(value.(string), -1); len(randRangeMatches) > 0 {
 					innerContent := randCommasMatches[0][1]
@@ -227,6 +236,27 @@ func generateRandom(values []string, targetType string) (any, error) {
 	}
 
 	return nil, errors.New("can't generate random for type: " + targetType)
+}
+
+func generateRandomWords(textLength string) (string, error) {
+	length, err := strconv.Atoi(textLength)
+	if err != nil {
+		return "", err
+	}
+
+	if length > 35 {
+		return "", errors.New("too long length for {random{word{}}} can't be over 35")
+	}
+
+	rand := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	var generatedText []string
+	for i := 0; i < length; i++ {
+		word := RandomWords[rand.Intn(len(RandomWords))]
+		generatedText = append(generatedText, word)
+	}
+
+	return strings.Join(generatedText, " "), nil
 }
 
 func generateRandomNumber(values []string, targetType string) (any, error) {

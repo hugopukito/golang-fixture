@@ -140,6 +140,18 @@ In this example it will generate a new time.
 
 You can use random in three ways.
 
+#### Word
+
+You can generate random words like lorem ipsum with a limit of 35 words string
+
+```yaml
+Cat:
+  cat_random:
+    name: "{random{word{10}}}"
+```
+
+This will generate a 10 random words long string.
+
 #### Range
 
 For int and float with a range
